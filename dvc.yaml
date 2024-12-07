@@ -1,0 +1,15 @@
+stages:
+  extract:
+    cmd: python euroleague_data_collector.py
+    deps:
+      - euroleague_data_collector.py
+    params:
+      - extract.season
+      - extract.data_dir
+      - extract.competition_code
+    outs:
+      - ${extract.data_dir}/raw/
+    metrics:
+      - extract_outputs.json:
+          cache: false
+

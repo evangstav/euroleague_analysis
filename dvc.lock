@@ -1,0 +1,24 @@
+schema: '2.0'
+stages:
+  extract:
+    cmd: python euroleague_data_collector.py
+    deps:
+    - path: euroleague_data_collector.py
+      hash: md5
+      md5: 4a13f5453903a5c7aea255f7fa6e63a0
+      size: 4781
+    params:
+      params.yaml:
+        extract.competition_code: E
+        extract.data_dir: euroleague_data
+        extract.season: 2023
+    outs:
+    - path: euroleague_data/raw/
+      hash: md5
+      md5: 6535366041b0770fa6c2c24d86f84cc1.dir
+      size: 2758993
+      nfiles: 5
+    - path: extract_outputs.json
+      hash: md5
+      md5: 184e8003bdd7aa5fb3a416bb91de5977
+      size: 333

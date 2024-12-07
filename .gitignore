@@ -1,0 +1,6 @@
+/euroleague_data
+/extract_outputs.json
+*.pyc
+__pycache__/
+.env
+.venv/

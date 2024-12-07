@@ -1,0 +1,4 @@
+extract:
+  season: 2023
+  data_dir: "euroleague_data"
+  competition_code: "E"

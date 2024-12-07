@@ -1,12 +1,12 @@
 """
-Euroleague Data Collection Module for Player Performance Analysis
-This module collects and structures data for analyzing player PIR predictions.
+Euroleague Data Collection Module with DVC pipeline support
 """
 
-from typing import List
-import pandas as pd
-import numpy as np
+from pathlib import Path
 import logging
+import yaml
+from typing import Dict, Any
+import json
 from euroleague_api.boxscore_data import BoxScoreData
 from euroleague_api.shot_data import ShotData
 from euroleague_api.play_by_play_data import PlayByPlay
@@ -16,213 +16,119 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class EuroleagueDataCollector:
-    def __init__(self, competition_code: str = "E"):
-        """
-        Initialize the data collector
+def load_params(params_path: str = "params.yaml") -> Dict[str, Any]:
+    """Load parameters from params.yaml"""
+    with open(params_path) as f:
+        params = yaml.safe_load(f).get("extract", {})
+    return params
 
-        Args:
-            competition_code: Competition code (default "E" for Euroleague)
-        """
-        self.competition_code = competition_code
-        self.boxscore_client = BoxScoreData(competition_code)
-        self.shot_data_client = ShotData(competition_code)
-        self.play_by_play_client = PlayByPlay(competition_code)
 
-    def collect_player_stats(self, season: int) -> pd.DataFrame:
-        """
-        Collect detailed player statistics for a season
+def extract_box_score_data(season: int, data_dir: Path, competition_code: str = "E"):
+    """Extract box score data for a given season and save to parquet."""
+    logger.info(f"Extracting box score data for season {season}")
 
-        Args:
-            season: The season to collect data for (e.g., 2023)
+    client = BoxScoreData(competition_code)
+    outputs = {}
 
-        Returns:
-            DataFrame containing player statistics including PIR
-        """
-        logger.info(f"Collecting player statistics for season {season}")
+    try:
+        # Player stats
+        player_stats = client.get_player_boxscore_stats_single_season(season)
+        player_stats_path = data_dir / "raw" / f"player_stats_{season}.parquet"
+        if not player_stats.empty:
+            player_stats.to_parquet(player_stats_path)
+            outputs["player_stats"] = str(player_stats_path)
+            logger.info(f"Saved player stats for season {season}")
 
-        try:
-            # Get player boxscore stats for the season
-            player_stats = self.boxscore_client.get_player_boxscore_stats_single_season(
-                season
-            )
-
-            # Add shot data if available
-            try:
-                shot_data = self.shot_data_client.get_game_shot_data_single_season(
-                    season
-                )
-                if not shot_data.empty:
-                    # Aggregate shot data by player and game
-                    shot_metrics = self._process_shot_data(shot_data)
-                    # Merge with player stats
-                    player_stats = player_stats.merge(
-                        shot_metrics, on=["Season", "Gamecode", "Player_ID"], how="left"
-                    )
-            except Exception as e:
-                logger.warning(f"Error collecting shot data: {str(e)}")
-
-            return player_stats
-
-        except Exception as e:
-            logger.error(f"Error collecting player statistics: {str(e)}")
-            return pd.DataFrame()
-
-    def _process_shot_data(self, shot_data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Process raw shot data to create player shooting metrics
-
-        Args:
-            shot_data: DataFrame containing raw shot data
-
-        Returns:
-            DataFrame with aggregated shooting metrics by player and game
-        """
-        # Group by game and player
-        shot_metrics = (
-            shot_data.groupby(["Season", "Gamecode", "Player_ID"])
-            .agg(
-                {
-                    "shot_made": ["sum", "count"],
-                    "shot_zone": lambda x: x.value_counts().to_dict(),
-                    "shot_type": lambda x: x.value_counts().to_dict(),
-                }
-            )
-            .reset_index()
+        # Quarter data
+        quarter_data = client.get_game_boxscore_quarter_data_single_season(
+            season, "ByQuarter"
         )
+        quarter_data_path = data_dir / "raw" / f"quarter_data_{season}.parquet"
+        if not quarter_data.empty:
+            quarter_data.to_parquet(quarter_data_path)
+            outputs["quarter_data"] = str(quarter_data_path)
+            logger.info(f"Saved quarter data for season {season}")
 
-        # Flatten column names
-        shot_metrics.columns = [
-            "Season",
-            "Gamecode",
-            "Player_ID",
-            "shots_made",
-            "shots_attempted",
-            "shot_zones",
-            "shot_types",
-        ]
+        # End quarter data
+        end_quarter_data = client.get_game_boxscore_quarter_data_single_season(
+            season, "EndOfQuarter"
+        )
+        end_quarter_path = data_dir / "raw" / f"end_quarter_data_{season}.parquet"
+        if not end_quarter_data.empty:
+            end_quarter_data.to_parquet(end_quarter_path)
+            outputs["end_quarter_data"] = str(end_quarter_path)
+            logger.info(f"Saved end quarter data for season {season}")
 
-        return shot_metrics
+        return outputs
 
-    def collect_team_performance(self, season: int) -> pd.DataFrame:
-        """
-        Collect team performance data including opponent stats
+    except Exception as e:
+        logger.error(f"Error extracting box score data: {str(e)}")
+        raise e
 
-        Args:
-            season: Season to collect data for
 
-        Returns:
-            DataFrame with team performance metrics
-        """
-        logger.info(f"Collecting team performance data for season {season}")
+def extract_shot_data(season: int, data_dir: Path, competition_code: str = "E"):
+    """Extract shot data for a given season and save to parquet."""
+    logger.info(f"Extracting shot data for season {season}")
 
-        try:
-            # Get quarter by quarter data for all games
-            quarters_data = (
-                self.boxscore_client.get_game_boxscore_quarter_data_single_season(
-                    season, boxscore_type="ByQuarter"
-                )
-            )
+    client = ShotData(competition_code)
+    try:
+        shot_data = client.get_game_shot_data_single_season(season)
+        shot_data_path = data_dir / "raw" / f"shot_data_{season}.parquet"
+        if not shot_data.empty:
+            shot_data.to_parquet(shot_data_path)
+            logger.info(f"Saved shot data for season {season}")
+            return {"shot_data": str(shot_data_path)}
+        return {}
+    except Exception as e:
+        logger.error(f"Error extracting shot data: {str(e)}")
+        raise e
 
-            # Get end of quarter data for pace and style metrics
-            end_quarter_data = (
-                self.boxscore_client.get_game_boxscore_quarter_data_single_season(
-                    season, boxscore_type="EndOfQuarter"
-                )
-            )
 
-            # Merge quarter and end of quarter data
-            if not quarters_data.empty and not end_quarter_data.empty:
-                team_data = quarters_data.merge(
-                    end_quarter_data,
-                    on=["Season", "Gamecode"],
-                    how="left",
-                    suffixes=("", "_end"),
-                )
-                return team_data
+def extract_playbyplay_data(season: int, data_dir: Path, competition_code: str = "E"):
+    """Extract play-by-play data for a given season and save to parquet."""
+    logger.info(f"Extracting play-by-play data for season {season}")
 
-            return quarters_data
+    client = PlayByPlay(competition_code)
+    try:
+        pbp_data = client.get_game_play_by_play_data_single_season(season)
+        pbp_path = data_dir / "raw" / f"playbyplay_data_{season}.parquet"
+        if not pbp_data.empty:
+            pbp_data.to_parquet(pbp_path)
+            logger.info(f"Saved play-by-play data for season {season}")
+            return {"playbyplay_data": str(pbp_path)}
+        return {}
+    except Exception as e:
+        logger.error(f"Error extracting play-by-play data: {str(e)}")
+        raise e
 
-        except Exception as e:
-            logger.error(f"Error collecting team performance data: {str(e)}")
-            return pd.DataFrame()
 
-    def prepare_pir_prediction_dataset(
-        self, seasons: List[int], lookback_games: int = 5
-    ) -> pd.DataFrame:
-        """
-        Prepare complete dataset for PIR prediction modeling
+def setup_directories(data_dir: str):
+    """Create necessary data directories."""
+    data_path = Path(data_dir)
+    (data_path / "raw").mkdir(parents=True, exist_ok=True)
+    return data_path
 
-        Args:
-            seasons: List of seasons to include
-            lookback_games: Number of previous games to use for rolling stats
 
-        Returns:
-            DataFrame ready for PIR prediction modeling
-        """
-        all_data = []
+def main():
+    # Load parameters
+    params = load_params()
+    season = params.get("season", 2023)
+    data_dir = params.get("data_dir", "euroleague_data")
+    competition_code = params.get("competition_code", "E")
 
-        for season in seasons:
-            # Collect all data sources
-            player_stats = self.collect_player_stats(season)
-            team_performance = self.collect_team_performance(season)
+    # Setup directories
+    data_path = setup_directories(data_dir)
 
-            if player_stats.empty:
-                logger.warning(f"No player stats available for season {season}")
-                continue
+    # Extract all data types
+    outputs = {}
+    outputs.update(extract_box_score_data(season, data_path, competition_code))
+    outputs.update(extract_shot_data(season, data_path, competition_code))
+    outputs.update(extract_playbyplay_data(season, data_path, competition_code))
 
-            # Process player statistics
-            if not player_stats.empty:
-                # Sort by player and date
-                player_stats = player_stats.sort_values(
-                    ["Player_ID", "Season", "Gamecode"]
-                )
-
-                # Calculate rolling averages for key metrics
-                metrics = ["PIR", "Minutes", "Points", "Ast", "RebD", "RebO"]
-                # TODO
-                # convert all metrics  to numeric
-                # only select the ones that are possible to aggregate
-                for metric in metrics:
-                    if metric in player_stats.columns:
-                        player_stats[f"{metric}_rolling_avg"] = player_stats.groupby(
-                            "Player_ID"
-                        )[metric].transform(
-                            lambda x: x.rolling(lookback_games, min_periods=1).mean()
-                        )
-
-                # Add team context if available
-                if not team_performance.empty:
-                    player_stats = player_stats.merge(
-                        team_performance, on=["Season", "Gamecode"], how="left"
-                    )
-
-                all_data.append(player_stats)
-
-        if not all_data:
-            logger.error("No data collected for any season")
-            return pd.DataFrame()
-
-        # Combine all seasons
-        final_dataset = pd.concat(all_data, ignore_index=True)
-
-        # Handle missing values
-        numeric_cols = final_dataset.select_dtypes(include=[np.number]).columns
-        final_dataset[numeric_cols] = final_dataset[numeric_cols].fillna(0)
-
-        return final_dataset
+    # Save outputs for DVC
+    with open("extract_outputs.json", "w") as f:
+        json.dump(outputs, f)
 
 
 if __name__ == "__main__":
-    # Initialize collector
-    collector = EuroleagueDataCollector()
-
-    # Collect data for multiple seasons
-    dataset = collector.prepare_pir_prediction_dataset(seasons=[2023], lookback_games=5)
-
-    # Save to CSV
-    if not dataset.empty:
-        dataset.to_csv("euroleague_pir_prediction_data.csv", index=False)
-        print(f"Dataset saved with {len(dataset)} records")
-    else:
-        print("No data collected")
+    main()
