@@ -13,3 +13,19 @@ stages:
       - extract_outputs.json:
           cache: false
 
+  features:
+    cmd: python feature_engineering.py
+    deps:
+      - feature_engineering.py
+      - ${extract.data_dir}/raw/
+    params:
+      - features.season
+      - features.data_dir
+      - features.rolling_windows
+      - features.min_minutes
+    outs:
+      - ${features.data_dir}/features.parquet
+      - ${features.data_dir}/features.duckdb
+    metrics:
+      - feature_outputs.json:
+          cache: false

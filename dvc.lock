@@ -22,3 +22,36 @@ stages:
       hash: md5
       md5: 184e8003bdd7aa5fb3a416bb91de5977
       size: 333
+  features:
+    cmd: python feature_engineering.py
+    deps:
+    - path: euroleague_data/raw/
+      hash: md5
+      md5: 6535366041b0770fa6c2c24d86f84cc1.dir
+      size: 2758993
+      nfiles: 5
+    - path: feature_engineering.py
+      hash: md5
+      md5: a67275c8d975d79c8763a44e9493912b
+      size: 32430
+    params:
+      params.yaml:
+        features.data_dir: euroleague_data
+        features.min_minutes: 0
+        features.rolling_windows:
+        - 3
+        - 5
+        features.season: 2023
+    outs:
+    - path: euroleague_data/features.duckdb
+      hash: md5
+      md5: fb5e1d07400f12c9b46811acf9a1ece5
+      size: 274432
+    - path: euroleague_data/features.parquet
+      hash: md5
+      md5: 6d97792879bda5a7872d8dbd06622baf
+      size: 622109
+    - path: feature_outputs.json
+      hash: md5
+      md5: 91afc263562fd94ed803ff9a634fa55f
+      size: 105

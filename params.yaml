@@ -2,3 +2,9 @@ extract:
   season: 2023
   data_dir: "euroleague_data"
   competition_code: "E"
+
+features:
+  season: 2023
+  data_dir: "euroleague_data"
+  rolling_windows: [3, 5]  # Number of games for rolling averages
+  min_minutes: 0  # Minimum minutes played to include in analysis
