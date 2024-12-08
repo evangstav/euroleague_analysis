@@ -1,0 +1,95 @@
+{
+  "overall_metrics": {
+    "rmse": 7.456564916305345,
+    "mae": 4.859110534540928,
+    "r2": 0.9450928478873387,
+    "mean_error": 0.02750733276425222,
+    "std_error": 7.456514178737939,
+    "median_error": -0.46331886779344655,
+    "q1_error": -3.1975955826330953,
+    "q3_error": 3.0396014586626543,
+    "max_overpredict": -67.29061813243229,
+    "max_underpredict": 68.07093229004386,
+    "within_5_pir": 66.51288196524865,
+    "within_10_pir": 88.478130617136
+  },
+  "feature_analysis": {},
+  "top_players": [
+    {
+      "Player_ID": "P011201   ",
+      "rmse": 1.339213203507647,
+      "mae": 1.1919253819327054,
+      "mean_error": -1.004124949583456,
+      "games_predicted": 11.0
+    },
+    {
+      "Player_ID": "P011926   ",
+      "rmse": 1.4851906873433174,
+      "mae": 1.232015770824072,
+      "mean_error": -0.8758773307241766,
+      "games_predicted": 17.0
+    },
+    {
+      "Player_ID": "P009101   ",
+      "rmse": 1.592383746504942,
+      "mae": 1.2700014182135624,
+      "mean_error": -0.8958305685937145,
+      "games_predicted": 11.0
+    },
+    {
+      "Player_ID": "P006544   ",
+      "rmse": 1.8036402734663433,
+      "mae": 1.4488815523756087,
+      "mean_error": -0.4037956870239046,
+      "games_predicted": 13.0
+    },
+    {
+      "Player_ID": "P002969   ",
+      "rmse": 1.9668674507529027,
+      "mae": 1.5399261107393045,
+      "mean_error": -0.8193380912581458,
+      "games_predicted": 17.0
+    },
+    {
+      "Player_ID": "P003204   ",
+      "rmse": 2.0653116060624077,
+      "mae": 1.511747460310244,
+      "mean_error": -0.5997644982203726,
+      "games_predicted": 27.0
+    },
+    {
+      "Player_ID": "P009917   ",
+      "rmse": 2.098621133658758,
+      "mae": 1.5571446412746923,
+      "mean_error": -0.8858559042352783,
+      "games_predicted": 15.0
+    },
+    {
+      "Player_ID": "P001518   ",
+      "rmse": 2.1395808826131106,
+      "mae": 1.6884749277629754,
+      "mean_error": -1.082280918832402,
+      "games_predicted": 43.0
+    },
+    {
+      "Player_ID": "P006302   ",
+      "rmse": 2.147121254500806,
+      "mae": 1.7002359483789726,
+      "mean_error": -1.2365989033564275,
+      "games_predicted": 27.0
+    },
+    {
+      "Player_ID": "P005478   ",
+      "rmse": 2.1911447246318283,
+      "mae": 1.8042685950852166,
+      "mean_error": -0.5796055513335733,
+      "games_predicted": 23.0
+    }
+  ],
+  "plots_generated": [
+    "actual_vs_predicted.png",
+    "residuals.png",
+    "error_distribution.png",
+    "error_by_pir_range.png"
+  ]
+}

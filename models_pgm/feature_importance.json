@@ -1,0 +1,67 @@
+{
+  "performance": {
+    "features": [
+      "PIR",
+      "minutes_played",
+      "Points"
+    ],
+    "effects": [
+      0.493,
+      0.057,
+      -0.004
+    ],
+    "uncertainties": [
+      0.022,
+      0.017,
+      0.021
+    ]
+  },
+  "efficiency": {
+    "features": [
+      "fg_percentage",
+      "ft_percentage",
+      "ast_to_turnover"
+    ],
+    "effects": [
+      0.003,
+      0.002,
+      -0.003
+    ],
+    "uncertainties": [
+      0.009,
+      0.007,
+      0.008
+    ]
+  },
+  "momentum": {
+    "features": [
+      "pir_ma3",
+      "points_ma3",
+      "minutes_ma3"
+    ],
+    "effects": [
+      0.015,
+      0.013,
+      0.001
+    ],
+    "uncertainties": [
+      0.017,
+      0.017,
+      0.014
+    ]
+  },
+  "context": {
+    "features": [
+      "is_starter",
+      "is_home"
+    ],
+    "effects": [
+      0.003,
+      -0.003
+    ],
+    "uncertainties": [
+      0.009,
+      0.008
+    ]
+  }
+}

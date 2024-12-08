@@ -1,0 +1,178 @@
+[
+  {
+    "feature": "PIR",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "Points",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_d_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_e_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_f_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_g_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_h_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_i_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_j_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "clutch_play_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "close_game_play_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "game_involvement_span",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "q1_play_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "q2_play_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "q3_play_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "q4_play_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "points_ma3",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "point_differential_ma3",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "game_volatility",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "margin_of_victory",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "is_starter",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_c_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_b_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "zone_a_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "points_ma3",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "minutes_played",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "fg_percentage",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "ft_percentage",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "three_point_attempt_rate",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "ast_to_turnover",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "rebounds_per_minute",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "defensive_plays_per_minute",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "minutes_ma3",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "pir_ma3",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "fastbreak_ppp_ma3",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "fg_percentage_ma3",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "usage_ma3",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "pir_std3",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "pir_rank_in_game",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "pir_vs_season_avg",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "improving_form",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "fastbreak_ppp",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "second_chance_ppp",
+    "importance": 0.022727272727272728
+  },
+  {
+    "feature": "is_home",
+    "importance": 0.022727272727272728
+  }
+]
