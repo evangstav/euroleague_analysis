@@ -233,6 +233,68 @@ def create_rolling_stats_view(
     """)
 
 
+def create_player_tier_view(conn: duckdb.DuckDBPyConnection):
+    logger.info("Creating player tier view")
+    conn.execute("""
+        CREATE OR REPLACE VIEW player_tiers_view AS
+        WITH player_season_stats AS (
+            SELECT 
+                Player_ID,
+                COUNT(*) as games_played,
+                AVG(PIR) as avg_season_pir,
+                STDDEV(PIR) as std_season_pir,
+                MAX(PIR) as max_season_pir,
+                MIN(PIR) as min_season_pir,
+                AVG(CASE WHEN PIR >= 0 THEN PIR END) as avg_positive_pir
+            FROM player_stats_features
+            GROUP BY Player_ID
+        ),
+        
+        -- Calculate std deviation thresholds
+        std_thresholds AS (
+            SELECT 
+                PERCENTILE_CONT(0.33) WITHIN GROUP (ORDER BY std_season_pir) as std_33_percentile,
+                PERCENTILE_CONT(0.67) WITHIN GROUP (ORDER BY std_season_pir) as std_67_percentile
+            FROM player_season_stats
+            WHERE games_played >= 10
+        ),
+
+        -- Create player tiers based on season performance
+        player_tiers AS (
+            SELECT 
+                s.*,
+                CASE
+                    WHEN games_played >= 10 AND avg_season_pir >= 20 THEN 'elite'
+                    WHEN games_played >= 10 AND avg_season_pir >= 15 THEN 'high_impact'
+                    WHEN games_played >= 10 AND avg_season_pir >= 10 THEN 'solid'
+                    WHEN games_played >= 10 THEN 'role_player'
+                    ELSE 'insufficient_data'
+                END as player_tier,
+                
+                CASE
+                    WHEN games_played >= 10 AND std_season_pir <= (SELECT std_33_percentile FROM std_thresholds) THEN 'consistent'
+                    WHEN games_played >= 10 AND std_season_pir >= (SELECT std_67_percentile FROM std_thresholds) THEN 'volatile'
+                    WHEN games_played >= 10 THEN 'moderate'
+                    ELSE 'insufficient_data'
+                END as consistency_tier
+            FROM player_season_stats s
+        )
+
+        SELECT 
+            p.*,
+            t.player_tier,
+            t.consistency_tier,
+            t.avg_season_pir,
+            t.std_season_pir,
+            t.games_played,
+            t.avg_positive_pir,
+            t.max_season_pir,
+            t.min_season_pir
+        FROM player_stats_features p
+        LEFT JOIN player_tiers t ON p.Player_ID = t.Player_ID
+    """)
+
+
 def create_shot_patterns_view(
     conn: duckdb.DuckDBPyConnection, season: int, data_dir: Path
 ):
@@ -819,7 +881,17 @@ def create_final_feature_set(conn: duckdb.DuckDBPyConnection, output_dir: Path):
         g.point_differential_ma3,
         g.game_volatility,
         g.won_game,
-        g.margin_of_victory
+        g.margin_of_victory,
+
+        -- Player tier features
+        h.player_tier,
+        h.consistency_tier,
+        h.avg_season_pir,
+        h.std_season_pir,
+        h.games_played,
+        h.avg_positive_pir,
+        h.max_season_pir,
+        h.min_season_pir
 
     FROM player_stats_features r
     LEFT JOIN shot_patterns s 
@@ -831,6 +903,9 @@ def create_final_feature_set(conn: duckdb.DuckDBPyConnection, output_dir: Path):
     LEFT JOIN game_context g 
         ON r.Gamecode = g.Gamecode
         AND r.Season = g.Season
+    LEFT JOIN player_tiers_view h
+        ON r.Player_ID = h.Player_ID
+        AND r.Gamecode = h.Gamecode
     WHERE r.minutes_played > 0
     ORDER BY r.Season, r.Round, r.Gamecode, r.PIR DESC
     """
@@ -872,6 +947,8 @@ def main():
 
     create_playbyplay_features_view(conn, season, data_dir)
 
+    create_player_tier_view(conn)
+
     # Generate final feature set
     create_final_feature_set(conn, data_dir)
 
@@ -889,3 +966,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

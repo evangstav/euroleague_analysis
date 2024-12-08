@@ -15,8 +15,8 @@ stages:
     outs:
     - path: euroleague_data/raw/
       hash: md5
-      md5: 6535366041b0770fa6c2c24d86f84cc1.dir
-      size: 2758993
+      md5: 85270b6b4700f28722fe0780a36c0fcb.dir
+      size: 2691311
       nfiles: 5
     - path: extract_outputs.json
       hash: md5
@@ -27,13 +27,13 @@ stages:
     deps:
     - path: euroleague_data/raw/
       hash: md5
-      md5: 6535366041b0770fa6c2c24d86f84cc1.dir
-      size: 2758993
+      md5: 85270b6b4700f28722fe0780a36c0fcb.dir
+      size: 2691311
       nfiles: 5
     - path: feature_engineering.py
       hash: md5
-      md5: a67275c8d975d79c8763a44e9493912b
-      size: 32430
+      md5: bda91bdc8beb3bb6a364c73cf857e56c
+      size: 35158
     params:
       params.yaml:
         features.data_dir: euroleague_data
@@ -45,13 +45,143 @@ stages:
     outs:
     - path: euroleague_data/features.duckdb
       hash: md5
-      md5: fb5e1d07400f12c9b46811acf9a1ece5
+      md5: f31fb2cf10bfba1105c068eb8e4c9145
       size: 274432
     - path: euroleague_data/features.parquet
       hash: md5
-      md5: 6d97792879bda5a7872d8dbd06622baf
-      size: 622109
+      md5: 147ed7fc7319c0d507c3208fb3e9a574
+      size: 741819
     - path: feature_outputs.json
       hash: md5
       md5: 91afc263562fd94ed803ff9a634fa55f
       size: 105
+  train:
+    cmd: python train_model.py
+    deps:
+    - path: euroleague_data/features.parquet
+      hash: md5
+      md5: 147ed7fc7319c0d507c3208fb3e9a574
+      size: 741819
+    - path: train_model.py
+      hash: md5
+      md5: d9cf26231739a7f31a6d7cac3c2191d4
+      size: 7463
+    params:
+      params.yaml:
+        train.data_dir: euroleague_data
+        train.early_stopping: true
+        train.l2_regularization: 1.0
+        train.learning_rate: 0.1
+        train.max_depth: 5
+        train.max_iter: 100
+        train.min_samples_leaf: 20
+        train.model_dir: models
+        train.n_iter_no_change: 10
+        train.n_splits: 5
+        train.validation_fraction: 0.1
+    outs:
+    - path: models/feature_importance.json
+      hash: md5
+      md5: 5eec2e60d539aedc090c0543366b180d
+      size: 3535
+    - path: models/metrics.json
+      hash: md5
+      md5: a2f413968e93ea42df5ee49536945313
+      size: 87
+    - path: models/pir_predictor.joblib
+      hash: md5
+      md5: b28f2dcd7ff5c07b9f439d63c4732270
+      size: 192006
+    - path: models/scaler.joblib
+      hash: md5
+      md5: d69b62399a900f033551336dcf2fa0bd
+      size: 2839
+  analyze:
+    cmd: python analyze_predictions.py
+    deps:
+    - path: analyze_predictions.py
+      hash: md5
+      md5: 86908fb3d9faac05e20896db5a543e4c
+      size: 8390
+    - path: euroleague_data/features.parquet
+      hash: md5
+      md5: 147ed7fc7319c0d507c3208fb3e9a574
+      size: 741819
+    - path: models/feature_importance.json
+      hash: md5
+      md5: 5eec2e60d539aedc090c0543366b180d
+      size: 3535
+    - path: models/pir_predictor.joblib
+      hash: md5
+      md5: b28f2dcd7ff5c07b9f439d63c4732270
+      size: 192006
+    - path: models/scaler.joblib
+      hash: md5
+      md5: d69b62399a900f033551336dcf2fa0bd
+      size: 2839
+    params:
+      params.yaml:
+        analyze.analysis_dir: analysis
+        analyze.data_dir: euroleague_data
+        analyze.model_dir: models
+    outs:
+    - path: analysis/actual_vs_predicted.png
+      hash: md5
+      md5: 992ae788f5830495d72454074663036f
+      size: 107198
+    - path: analysis/analysis_results.json
+      hash: md5
+      md5: e2f2faa5a92fa1c2241c49a233b78108
+      size: 2493
+    - path: analysis/error_by_pir_range.png
+      hash: md5
+      md5: d5816cc63d2734e3bbac1c6dad4629ca
+      size: 44451
+    - path: analysis/error_distribution.png
+      hash: md5
+      md5: b4891e9b751b95687fd1fcc17d23995e
+      size: 30707
+    - path: analysis/residuals.png
+      hash: md5
+      md5: d1d3129adf093d015af5f833d83b1ba1
+      size: 114739
+  train_pgm:
+    cmd: python train_pgm.py
+    deps:
+    - path: euroleague_data/features.parquet
+      hash: md5
+      md5: 147ed7fc7319c0d507c3208fb3e9a574
+      size: 741819
+    - path: train_pgm.py
+      hash: md5
+      md5: 3f8258559a4f237237a67f4addd733a3
+      size: 7504
+    params:
+      params.yaml:
+        train_pgm.data_dir: euroleague_data
+        train_pgm.model_dir: models_pgm
+        train_pgm.n_chains: 4
+        train_pgm.n_cores:
+        train_pgm.n_samples: 1000
+        train_pgm.n_tune: 1000
+    outs:
+    - path: models_pgm/inference_data.nc
+      hash: md5
+      md5: 6e09f1571bdcc85c44a6b4eebc38db4a
+      size: 716632
+    - path: models_pgm/pgm_metrics.json
+      hash: md5
+      md5: 639fb9b1889480de8d4f8ecfc590b8a8
+      size: 141
+    - path: models_pgm/pgm_parameters.json
+      hash: md5
+      md5: d66a1d2c12a9e3973a34badd78ec509e
+      size: 2918
+    - path: models_pgm/scaler.joblib
+      hash: md5
+      md5: 2607d1454b93b1b2c6afdbb15d8b9ccd
+      size: 1063
+    - path: models_pgm/target_stats.joblib
+      hash: md5
+      md5: 55b67e33809209dba2b764332e526e8f
+      size: 47

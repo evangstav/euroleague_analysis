@@ -1,4 +1,1 @@
-{
-	"features_file": "euroleague_data/features.parquet",
-	"database_file": "euroleague_data/features.duckdb"
-}
+{"features_file": "euroleague_data/features.parquet", "database_file": "euroleague_data/features.duckdb"}
