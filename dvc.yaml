@@ -29,3 +29,72 @@ stages:
     metrics:
       - feature_outputs.json:
           cache: false
+          
+  train:
+    cmd: python train_model.py
+    deps:
+      - train_model.py
+      - ${features.data_dir}/features.parquet
+    params:
+      - train.data_dir
+      - train.model_dir
+      - train.max_iter
+      - train.learning_rate
+      - train.max_depth
+      - train.min_samples_leaf
+      - train.l2_regularization
+      - train.validation_fraction
+      - train.early_stopping
+      - train.n_iter_no_change
+      - train.n_splits
+    outs:
+      - ${train.model_dir}/pir_predictor.joblib
+      - ${train.model_dir}/scaler.joblib
+    metrics:
+      - ${train.model_dir}/metrics.json:
+          cache: false
+      - ${train.model_dir}/feature_importance.json:
+          cache: false
+
+  analyze:
+    cmd: python analyze_predictions.py
+    deps:
+      - analyze_predictions.py
+      - ${features.data_dir}/features.parquet
+      - ${train.model_dir}/pir_predictor.joblib
+      - ${train.model_dir}/scaler.joblib
+      - ${train.model_dir}/feature_importance.json
+    params:
+      - analyze.data_dir
+      - analyze.model_dir
+      - analyze.analysis_dir
+    outs:
+      - ${analyze.analysis_dir}/actual_vs_predicted.png
+      - ${analyze.analysis_dir}/residuals.png
+      - ${analyze.analysis_dir}/error_distribution.png
+      - ${analyze.analysis_dir}/error_by_pir_range.png
+    metrics:
+      - ${analyze.analysis_dir}/analysis_results.json:
+          cache: false
+
+  train_pgm:
+    cmd: python train_pgm.py
+    deps:
+      - train_pgm.py
+      - ${features.data_dir}/features.parquet
+    params:
+      - train_pgm.data_dir
+      - train_pgm.model_dir
+      - train_pgm.n_samples
+      - train_pgm.n_tune
+      - train_pgm.n_chains
+      - train_pgm.n_cores
+    outs:
+      - ${train_pgm.model_dir}/inference_data.nc
+      - ${train_pgm.model_dir}/scaler.joblib
+      - ${train_pgm.model_dir}/target_stats.joblib
+    metrics:
+      - ${train_pgm.model_dir}/pgm_metrics.json:
+          cache: false
+      - ${train_pgm.model_dir}/pgm_parameters.json:
+          cache: false
