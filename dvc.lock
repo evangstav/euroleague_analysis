@@ -154,34 +154,118 @@ stages:
       size: 741819
     - path: train_pgm.py
       hash: md5
-      md5: 3f8258559a4f237237a67f4addd733a3
-      size: 7504
+      md5: 3f2d522028622bde3700e2c2a135a401
+      size: 10446
     params:
       params.yaml:
         train_pgm.data_dir: euroleague_data
         train_pgm.model_dir: models_pgm
-        train_pgm.n_chains: 4
-        train_pgm.n_cores:
-        train_pgm.n_samples: 1000
-        train_pgm.n_tune: 1000
+        train_pgm.n_chains: 2
+        train_pgm.n_samples: 2000
+        train_pgm.n_tune: 2000
     outs:
     - path: models_pgm/inference_data.nc
       hash: md5
-      md5: 6e09f1571bdcc85c44a6b4eebc38db4a
-      size: 716632
+      md5: 266687c272a9e2db9fd690b3eead00a9
+      size: 8502378
+    - path: models_pgm/metadata.joblib
+      hash: md5
+      md5: 1aca9e8251507c995733959f0d78451f
+      size: 4078
     - path: models_pgm/pgm_metrics.json
       hash: md5
-      md5: 639fb9b1889480de8d4f8ecfc590b8a8
-      size: 141
+      md5: 921244797ef31ffe5a7a9d5256f7a341
+      size: 182
     - path: models_pgm/pgm_parameters.json
       hash: md5
-      md5: d66a1d2c12a9e3973a34badd78ec509e
-      size: 2918
-    - path: models_pgm/scaler.joblib
+      md5: e4267d386541b99d07ac11ce2294b5ea
+      size: 79798
+    - path: models_pgm/scalers.joblib
       hash: md5
-      md5: 2607d1454b93b1b2c6afdbb15d8b9ccd
-      size: 1063
+      md5: 2c5d6bca7f8aeef964bb8b8209e8fac5
+      size: 2753
     - path: models_pgm/target_stats.joblib
       hash: md5
-      md5: 55b67e33809209dba2b764332e526e8f
+      md5: 073574cf6632c2712aadc3dd2b0b5c1e
       size: 47
+  analyze_pgm:
+    cmd: python analyze_pgm.py
+    deps:
+    - path: analyze_pgm.py
+      hash: md5
+      md5: eb04a889bef4d299baa3f2dd3ae6a3f5
+      size: 13608
+    - path: euroleague_data/features.parquet
+      hash: md5
+      md5: 147ed7fc7319c0d507c3208fb3e9a574
+      size: 741819
+    - path: models_pgm/inference_data.nc
+      hash: md5
+      md5: 266687c272a9e2db9fd690b3eead00a9
+      size: 8502378
+    - path: models_pgm/metadata.joblib
+      hash: md5
+      md5: 1aca9e8251507c995733959f0d78451f
+      size: 4078
+    - path: models_pgm/pgm_metrics.json
+      hash: md5
+      md5: 921244797ef31ffe5a7a9d5256f7a341
+      size: 182
+    - path: models_pgm/pgm_parameters.json
+      hash: md5
+      md5: e4267d386541b99d07ac11ce2294b5ea
+      size: 79798
+    - path: models_pgm/scalers.joblib
+      hash: md5
+      md5: 2c5d6bca7f8aeef964bb8b8209e8fac5
+      size: 2753
+    - path: models_pgm/target_stats.joblib
+      hash: md5
+      md5: 073574cf6632c2712aadc3dd2b0b5c1e
+      size: 47
+    params:
+      params.yaml:
+        analyze_pgm.analysis_dir: analysis_pgm
+        analyze_pgm.data_dir: euroleague_data
+        analyze_pgm.model_dir: models_pgm
+    outs:
+    - path: analysis_pgm/context_effects.png
+      hash: md5
+      md5: 16d5a7284e2969b5247c5b5c99fafcfa
+      size: 15193
+    - path: analysis_pgm/detailed_analysis.json
+      hash: md5
+      md5: 5ef805dadd412f2f3b0f06690b6506e9
+      size: 7635
+    - path: analysis_pgm/efficiency_effects.png
+      hash: md5
+      md5: 92acae7e2ff40cf80a7adbe5d95b897b
+      size: 19293
+    - path: analysis_pgm/group_effects.png
+      hash: md5
+      md5: 7f6bc162171685a61a9bb073ed825e73
+      size: 27813
+    - path: analysis_pgm/momentum_effects.png
+      hash: md5
+      md5: 5e73754e44c18b0a57fba7373dd5209d
+      size: 16712
+    - path: analysis_pgm/performance_effects.png
+      hash: md5
+      md5: 227de8be578fa92c237ef22c0967bfa7
+      size: 15941
+    - path: analysis_pgm/player_effects_dist.png
+      hash: md5
+      md5: 559387d3a7e6d4ea30b63f123a3170ad
+      size: 36053
+    - path: analysis_pgm/posterior_distributions.png
+      hash: md5
+      md5: 032147c83679bef7af7628ee86aa67e1
+      size: 49633
+    - path: analysis_pgm/prediction_accuracy.png
+      hash: md5
+      md5: 100114330a3692ba49e9162360ecac96
+      size: 282542
+    - path: analysis_pgm/tier_effects.png
+      hash: md5
+      md5: acbe3ddc05b0ac75fc830be3e8a642b9
+      size: 18407

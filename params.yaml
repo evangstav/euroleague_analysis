@@ -31,8 +31,11 @@ analyze:
 train_pgm:
   data_dir: "euroleague_data"
   model_dir: "models_pgm"
-  # MCMC parameters
-  n_samples: 1000  # Number of posterior samples
-  n_tune: 1000     # Number of tuning steps
-  n_chains: 4      # Number of MCMC chains
-  n_cores: null    # Number of cores (null = auto)
+  n_samples: 2000
+  n_tune: 2000
+  n_chains: 2
+
+analyze_pgm:
+  data_dir: "euroleague_data"
+  model_dir: "models_pgm"
+  analysis_dir: "analysis_pgm"

@@ -29,7 +29,7 @@ stages:
     metrics:
       - feature_outputs.json:
           cache: false
-          
+
   train:
     cmd: python train_model.py
     deps:
@@ -88,13 +88,43 @@ stages:
       - train_pgm.n_samples
       - train_pgm.n_tune
       - train_pgm.n_chains
-      - train_pgm.n_cores
     outs:
       - ${train_pgm.model_dir}/inference_data.nc
-      - ${train_pgm.model_dir}/scaler.joblib
+      - ${train_pgm.model_dir}/scalers.joblib
+      - ${train_pgm.model_dir}/metadata.joblib
       - ${train_pgm.model_dir}/target_stats.joblib
     metrics:
       - ${train_pgm.model_dir}/pgm_metrics.json:
           cache: false
       - ${train_pgm.model_dir}/pgm_parameters.json:
           cache: false
+
+  analyze_pgm:
+    cmd: python analyze_pgm.py
+    deps:
+      - analyze_pgm.py
+      - ${features.data_dir}/features.parquet
+      - ${train_pgm.model_dir}/inference_data.nc
+      - ${train_pgm.model_dir}/metadata.joblib
+      - ${train_pgm.model_dir}/target_stats.joblib
+      - ${train_pgm.model_dir}/scalers.joblib
+      - ${train_pgm.model_dir}/pgm_metrics.json
+      - ${train_pgm.model_dir}/pgm_parameters.json
+    params:
+      - analyze_pgm.data_dir
+      - analyze_pgm.model_dir
+      - analyze_pgm.analysis_dir
+    outs:
+      - ${analyze_pgm.analysis_dir}/posterior_distributions.png
+      - ${analyze_pgm.analysis_dir}/group_effects.png
+      - ${analyze_pgm.analysis_dir}/prediction_accuracy.png
+      - ${analyze_pgm.analysis_dir}/player_effects_dist.png
+      - ${analyze_pgm.analysis_dir}/tier_effects.png
+      - ${analyze_pgm.analysis_dir}/performance_effects.png
+      - ${analyze_pgm.analysis_dir}/efficiency_effects.png
+      - ${analyze_pgm.analysis_dir}/momentum_effects.png
+      - ${analyze_pgm.analysis_dir}/context_effects.png
+    metrics:
+      - ${analyze_pgm.analysis_dir}/detailed_analysis.json:
+          cache: false
+
