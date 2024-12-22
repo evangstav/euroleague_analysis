@@ -64,9 +64,9 @@ game_stats AS (
     FROM player_stats
 ),
 
--- Add rolling averages and game-by-game rankings
-SELECT 
-    *,
+player_features AS (
+    SELECT 
+        gs.*,
     -- Rolling averages (3 games)
     AVG(minutes_played) OVER (
         PARTITION BY Player_ID 

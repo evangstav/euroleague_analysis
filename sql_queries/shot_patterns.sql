@@ -43,9 +43,9 @@ WITH game_shots AS (
     GROUP BY Season, Gamecode, ID_PLAYER
 ),
 
--- Calculate efficiency metrics
-SELECT 
-    *,
+shot_metrics AS (
+    SELECT 
+        gs.*,
     -- Shooting percentages
     CAST(made_shots AS FLOAT) / NULLIF(total_shots, 0) as fg_percentage,
     CAST(made_2pt AS FLOAT) / NULLIF(attempts_2pt, 0) as fg_percentage_2pt,
@@ -85,6 +85,9 @@ SELECT
         ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING
     ) as fastbreak_ppp_ma3
 
-FROM game_shots
+FROM game_shots gs
 WHERE total_shots > 0
 ORDER BY Season, Gamecode, total_shots DESC
+)
+
+SELECT * FROM shot_metrics
