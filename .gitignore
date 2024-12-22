@@ -5,3 +5,6 @@ __pycache__/
 .env
 .venv/
 .aider*
+.uv/
+.dvc/
+/dvc.lock
