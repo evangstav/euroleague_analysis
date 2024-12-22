@@ -6,12 +6,140 @@ from pathlib import Path
 import logging
 import yaml
 import json
+from dataclasses import dataclass
 import duckdb
-from typing import Dict, Any
+import pandas as pd
+from typing import Dict, Any, Optional
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
+
+@dataclass
+class FeatureConfig:
+    """Configuration for feature engineering"""
+    season: int
+    data_dir: Path
+    db_path: str
+    output_dir: Path
+
+    @classmethod
+    def from_params(cls, params: Dict[str, Any]) -> 'FeatureConfig':
+        """Create config from params dictionary"""
+        data_dir = Path(params.get("data_dir", "euroleague_data"))
+        return cls(
+            season=params.get("season", 2023),
+            data_dir=data_dir,
+            db_path=str(data_dir / "features.duckdb"),
+            output_dir=data_dir
+        )
+
+class FeatureBuilder:
+    """Handles the feature engineering pipeline"""
+    
+    def __init__(self, config: FeatureConfig):
+        self.config = config
+        self.conn: Optional[duckdb.DuckDBPyConnection] = None
+        self._setup_logging()
+
+    def _setup_logging(self):
+        """Configure logging for this instance"""
+        self.logger = logging.getLogger(f"{__name__}.FeatureBuilder")
+        
+    def _load_sql_query(self, filename: str) -> str:
+        """Load SQL query from file"""
+        sql_path = Path("sql_queries") / filename
+        if not sql_path.exists():
+            raise FileNotFoundError(f"SQL query file not found: {sql_path}")
+        return sql_path.read_text().format(
+            data_dir=self.config.data_dir,
+            season=self.config.season
+        )
+
+    def connect(self):
+        """Initialize DuckDB connection with custom functions"""
+        self.logger.info("Initializing DuckDB connection")
+        self.conn = duckdb.connect(self.config.db_path)
+        
+        # Register custom functions
+        self.conn.execute("""
+            CREATE MACRO convert_minutes(time_str) AS (
+                CASE 
+                    WHEN time_str = '' OR time_str IS NULL OR time_str = 'DNP' THEN 0
+                    ELSE CAST(SPLIT_PART(time_str, ':', 1) AS INTEGER) + 
+                         CAST(SPLIT_PART(time_str, ':', 2) AS FLOAT) / 60
+                END
+            );
+        """)
+        
+    def close(self):
+        """Close database connection"""
+        if self.conn:
+            self.conn.close()
+            self.conn = None
+
+    def create_feature_views(self):
+        """Create all feature views"""
+        if not self.conn:
+            raise RuntimeError("Database connection not initialized")
+            
+        self.logger.info("Creating feature views")
+        
+        # Create views in order
+        view_files = [
+            "rolling_stats.sql",
+            "shot_patterns.sql", 
+            "game_context.sql",
+            "playbyplay_features.sql",
+            "player_tiers.sql"
+        ]
+        
+        for sql_file in view_files:
+            try:
+                query = self._load_sql_query(sql_file)
+                self.conn.execute(query)
+                self.logger.info(f"Created view from {sql_file}")
+            except Exception as e:
+                self.logger.error(f"Error creating view from {sql_file}: {e}")
+                raise
+
+    def create_final_features(self) -> pd.DataFrame:
+        """Generate final feature set"""
+        if not self.conn:
+            raise RuntimeError("Database connection not initialized")
+            
+        self.logger.info("Creating final feature set")
+        
+        try:
+            # Load and execute final features query
+            query = self._load_sql_query("final_features.sql")
+            df = self.conn.execute(query).df()
+            
+            # Save to parquet
+            output_path = self.config.output_dir / "features.parquet"
+            df.to_parquet(str(output_path))
+            self.logger.info(f"Saved features to {output_path}")
+            
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"Error creating final features: {e}")
+            raise
+
+    def save_metadata(self):
+        """Save feature metadata"""
+        metadata = {
+            "features_file": str(self.config.output_dir / "features.parquet"),
+            "database_file": self.config.db_path,
+        }
+
+        with open("feature_outputs.json", "w") as f:
+            json.dump(metadata, f, indent=2)
+            
+        self.logger.info("Saved feature metadata")
 
 
 def load_params(params_path: str = "params.yaml") -> Dict[str, Any]:
@@ -924,44 +1052,27 @@ def create_final_feature_set(conn: duckdb.DuckDBPyConnection, output_dir: Path):
 
 
 def main():
-    # Load parameters
-    params = load_params()
+    try:
+        # Load parameters
+        params = load_params()
+        config = FeatureConfig.from_params(params)
 
-    # season = params.get("season", 2023)
-    season = 2023
-
-    # data_dir = Path(params.get("data_dir", "euroleague_data"))
-    data_dir = Path("euroleague_data")
-
-    db_path = str(data_dir / "features.duckdb")
-
-    # Initialize DuckDB connection
-    conn = init_duckdb(db_path)
-
-    # Create feature views
-    create_rolling_stats_view(conn, season, data_dir)
-
-    create_shot_patterns_view(conn, season, data_dir)
-
-    create_game_context_view(conn, season, data_dir)
-
-    create_playbyplay_features_view(conn, season, data_dir)
-
-    create_player_tier_view(conn)
-
-    # Generate final feature set
-    create_final_feature_set(conn, data_dir)
-
-    # Save feature metadata
-    metadata = {
-        "features_file": str(data_dir / "features.parquet"),
-        "database_file": db_path,
-    }
-
-    with open("feature_outputs.json", "w") as f:
-        json.dump(metadata, f)
-
-    conn.close()
+        # Initialize feature builder
+        builder = FeatureBuilder(config)
+        
+        # Run feature engineering pipeline
+        builder.connect()
+        builder.create_feature_views()
+        builder.create_final_features()
+        builder.save_metadata()
+        
+    except Exception as e:
+        logger.error(f"Feature engineering failed: {e}")
+        raise
+        
+    finally:
+        if builder:
+            builder.close()
 
 
 if __name__ == "__main__":
