@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Dict, Any
 import yaml
 import logging
+import duckdb
 
 # Configure logging
 logging.basicConfig(

@@ -6,9 +6,9 @@ import pandas as pd
 from pathlib import Path
 from typing import List
 
-from .config import FeatureConfig
-from .database import FeatureDatabase
-from .views.stats import (
+from feature_engineering.config import FeatureConfig
+from feature_engineering.database import FeatureDatabase
+from feature_engineering.views.stats import (
     RollingStatsView,
     ShotPatternsView,
     GameContextView,

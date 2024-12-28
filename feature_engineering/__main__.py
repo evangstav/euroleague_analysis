@@ -1,8 +1,8 @@
 """Main entry point for feature engineering."""
 
 import logging
-from .config import FeatureConfig, load_params
-from .builder import FeatureBuilder
+from feature_engineering.config import FeatureConfig, load_params
+from feature_engineering.builder import FeatureBuilder
 
 logger = logging.getLogger(__name__)
 

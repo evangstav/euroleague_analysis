@@ -14,9 +14,9 @@ stages:
           cache: false
 
   features:
-    cmd: python feature_engineering.py
+    cmd: python -m feature_engineering
     deps:
-      - feature_engineering.py
+      - feature_engineering/
       - ${extract.data_dir}/raw/
     params:
       - features.season
