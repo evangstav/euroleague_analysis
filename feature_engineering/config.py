@@ -12,6 +12,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class FeatureConfig:
     """Configuration for feature engineering"""
@@ -31,6 +32,7 @@ class FeatureConfig:
             db_path=str(data_dir / "features.duckdb"),
             output_dir=data_dir,
         )
+
 
 def load_params(params_path: str = "params.yaml") -> Dict[str, Any]:
     """Load parameters from params.yaml"""

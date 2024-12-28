@@ -7,9 +7,10 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+
 class FeatureDatabase:
     """Handles database connections and SQL execution"""
-    
+
     def __init__(self, db_path: str):
         self.db_path = db_path
         self.conn: Optional[duckdb.DuckDBPyConnection] = None
@@ -40,14 +41,14 @@ class FeatureDatabase:
         """Execute SQL from file with formatting"""
         if not self.conn:
             raise RuntimeError("Database connection not initialized")
-            
+
         if not sql_path.exists():
             raise FileNotFoundError(f"SQL file not found: {sql_path}")
-            
+
         sql = sql_path.read_text()
         if format_args:
             sql = sql.format(**format_args)
-            
+
         self.conn.execute(sql)
         logger.info(f"Executed SQL from {sql_path}")
 
