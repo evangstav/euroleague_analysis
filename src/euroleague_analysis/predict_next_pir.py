@@ -41,10 +41,9 @@ def get_latest_features(data_dir: Path = Path("euroleague_data")) -> pd.DataFram
                 "Please run 'dvc repro' to generate features."
             )
 
-        # Load and prepare features
+        # Load features
         features_df = pd.read_parquet(features_path)
-        features_df = prepare_features(features_df)
-
+        logger.info(f"Available columns: {', '.join(features_df.columns)}")
         logger.info(f"Loaded features for {len(features_df)} player records")
         return features_df
     except Exception as e:
@@ -52,24 +51,69 @@ def get_latest_features(data_dir: Path = Path("euroleague_data")) -> pd.DataFram
         raise
 
 
-def predict_next_pir(model, scaler, features_df: pd.DataFrame) -> pd.DataFrame:
+def predict_next_pir(
+    model, scaler, features_df: pd.DataFrame, season: int = 2024
+) -> pd.DataFrame:
     """Generate PIR predictions for all players."""
     try:
-        # Filter out team totals
-        player_df = features_df[features_df["Player_ID"] != "Total"].copy()
+        # Get the latest round
+        latest_round = features_df[features_df["Season"] == season]["Round"].max()
+        next_round = latest_round + 1
+        logger.info(f"Generating predictions for Round {next_round}")
 
-        # Load player metadata
-        player_stats = pd.read_parquet("euroleague_data/raw/player_stats_2023.parquet")
-        player_meta = player_stats[["Player_ID", "Player", "Team"]].drop_duplicates()
+        # Get players from the latest round, excluding team totals
+        latest_players = features_df[
+            (features_df["Season"] == season)
+            & (features_df["Round"] == latest_round)
+            & (features_df["Player_ID"] != "Total")
+        ]["Player_ID"].unique()
+        logger.info(f"Found {len(latest_players)} players in Round {latest_round}")
+
+        # Get latest data for each player
+        player_rows = []
+        for player_id in latest_players:
+            player_data = (
+                features_df[
+                    (features_df["Player_ID"] == player_id)
+                    & (features_df["Season"] == season)
+                ]
+                .sort_values("Round", ascending=False)
+                .iloc[0]
+            )
+            player_rows.append(
+                dict(player_data)
+            )  # Convert to dict to preserve column names
+
+        # Create DataFrame with all columns preserved
+        player_df = pd.DataFrame(player_rows)
+        logger.info(f"Initial player DataFrame shape: {player_df.shape}")
+        logger.info(f"Initial player DataFrame columns: {', '.join(player_df.columns)}")
+
+        # Prepare features for prediction
+        player_df = prepare_features(player_df, for_prediction=True)
+        logger.info(f"After preparation player DataFrame shape: {player_df.shape}")
+        logger.info(
+            f"After preparation player DataFrame columns: {', '.join(player_df.columns)}"
+        )
 
         # Get feature matrix
         X = player_df[FEATURE_COLUMNS]
+        logger.info(f"Feature matrix shape: {X.shape}")
 
         # Scale features
         X_scaled = scaler.transform(X)
 
         # Generate predictions
         predictions = model.predict(X_scaled)
+
+        # Load player metadata
+        player_stats = pd.read_parquet(
+            f"euroleague_data/raw/player_stats_{season}.parquet"
+        )
+        player_meta = player_stats[
+            (player_stats["Player_ID"] != "Total")
+            & (player_stats["Player_ID"].isin(latest_players))
+        ][["Player_ID", "Player", "Team"]].drop_duplicates()
 
         # Create results dataframe with predictions
         results_df = pd.DataFrame(
@@ -82,17 +126,15 @@ def predict_next_pir(model, scaler, features_df: pd.DataFrame) -> pd.DataFrame:
                 "Points": player_df["Points"],
                 "IsStarter": player_df["is_starter"],
                 "IsHome": player_df["is_home"],
-                "Round": player_df["Round"],
+                "Round": next_round,  # Set to next round
             }
         )
 
         # Add player metadata
         results_df = results_df.merge(player_meta, on="Player_ID", how="left")
 
-        # Sort by predicted PIR and Round
-        results_df = results_df.sort_values(
-            ["PredictedPIR", "Round"], ascending=[False, True]
-        )
+        # Sort by predicted PIR
+        results_df = results_df.sort_values("PredictedPIR", ascending=False)
 
         logger.info(f"Generated predictions for {len(results_df)} players")
         return results_df
@@ -125,12 +167,12 @@ def save_predictions(predictions_df: pd.DataFrame, output_dir: Path):
 
 def format_prediction_report(predictions_df: pd.DataFrame, top_n: int = 20) -> str:
     """Format top predictions into a readable report."""
-    report = ["\n=== Top Players by Predicted PIR ===\n"]
+    next_round = predictions_df["Round"].iloc[0]
+    report = [f"\n=== Top Players by Predicted PIR for Round {next_round} ===\n"]
 
     for _, row in predictions_df.head(top_n).iterrows():
         report.append(
             f"{row['Player']} ({row['Team']})\n"
-            f"  Round: {row['Round']}\n"
             f"  Predicted PIR: {row['PredictedPIR']:.1f}\n"
             f"  Current PIR: {row['CurrentPIR']:.1f}\n"
             f"  PIR Trend: {row['PIRTrend']:.1f}\n"
@@ -138,7 +180,6 @@ def format_prediction_report(predictions_df: pd.DataFrame, top_n: int = 20) -> s
             f"  Points: {row['Points']:.1f}\n"
             f"  Starter: {'Yes' if row['IsStarter'] else 'No'}\n"
             f"  Home: {'Yes' if row['IsHome'] else 'No'}\n"
-            f"  Player ID: {row['Player_ID']}\n"
         )
 
     return "\n".join(report)
@@ -157,8 +198,8 @@ def main():
         # Get latest features
         features_df = get_latest_features(data_dir)
 
-        # Generate predictions
-        predictions_df = predict_next_pir(model, scaler, features_df)
+        # Generate predictions for 2024 season
+        predictions_df = predict_next_pir(model, scaler, features_df, season=2024)
 
         # Save predictions
         save_predictions(predictions_df, output_dir)

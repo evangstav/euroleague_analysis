@@ -46,18 +46,53 @@ TARGET_COLUMN = "next_PIR"
 ID_COLUMNS = ["Season", "Phase", "Round", "Gamecode", "Player_ID"]
 
 
-def prepare_features(df):
+def prepare_features(df, for_prediction=False):
     """Common feature preparation logic."""
-    # Sort by time for proper train/test splitting
-    df = df.sort_values(["Season", "Round"])
+    if not for_prediction:
+        # Sort by time for proper train/test splitting
+        df = df.sort_values(["Season", "Round"])
 
-    # Create target variable (next game PIR)
-    df[TARGET_COLUMN] = df.groupby("Player_ID")["PIR"].shift(-1)
+        # Create target variable (next game PIR)
+        df[TARGET_COLUMN] = df.groupby("Player_ID")["PIR"].shift(-1)
 
-    # Remove rows where next_PIR is NA (end of season games)
-    df = df.dropna(subset=[TARGET_COLUMN])
+        # Remove rows where next_PIR is NA (end of season games)
+        df = df.dropna(subset=[TARGET_COLUMN])
+
+    # Create a mapping of actual column names to expected names
+    column_mapping = {}
+    df_cols_lower = {col.lower(): col for col in df.columns}
+    for feature in FEATURE_COLUMNS:
+        if feature.lower() in df_cols_lower:
+            column_mapping[feature] = df_cols_lower[feature.lower()]
+        else:
+            # Try common variations
+            variations = [
+                feature,
+                feature.replace("_", ""),
+                feature.title().replace("_", ""),
+                feature.upper(),
+            ]
+            for var in variations:
+                if var in df.columns:
+                    column_mapping[feature] = var
+                    break
+
+    # Rename columns to match expected names
+    df = df.rename(columns={v: k for k, v in column_mapping.items()})
 
     # Handle missing values
-    df[FEATURE_COLUMNS] = df[FEATURE_COLUMNS].fillna(0).values
+    for col in FEATURE_COLUMNS:
+        if col not in df.columns:
+            df[col] = 0
+
+    df[FEATURE_COLUMNS] = df[FEATURE_COLUMNS].fillna(0)
+
+    # For prediction, we don't need the target column
+    if for_prediction:
+        # Keep only the necessary columns
+        keep_cols = FEATURE_COLUMNS + ID_COLUMNS + ["PIR"]  # Keep PIR for reference
+        all_cols = set(df.columns)
+        cols_to_keep = [col for col in keep_cols if col in all_cols]
+        df = df[cols_to_keep]
 
     return df
