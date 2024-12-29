@@ -269,3 +269,69 @@ stages:
       hash: md5
       md5: acbe3ddc05b0ac75fc830be3e8a642b9
       size: 18407
+  load_data:
+    cmd: uv run python -m src.euroleague_analysis.euroleague_data_collector
+    deps:
+    - path: src/euroleague_analysis/euroleague_data_collector.py
+      hash: md5
+      md5: 4a13f5453903a5c7aea255f7fa6e63a0
+      size: 4781
+    outs:
+    - path: euroleague_data/raw/end_quarter_data_2023.parquet
+      hash: md5
+      md5: fe913d5dcf1c800b3632f3a4e1e78ca1
+      size: 14145
+    - path: euroleague_data/raw/playbyplay_data_2023.parquet
+      hash: md5
+      md5: c8b3b0d45dac4ce4a0eac5f1f6bd2224
+      size: 1592319
+    - path: euroleague_data/raw/player_stats_2023.parquet
+      hash: md5
+      md5: 9955a857ccb25ce04bf556cf729b76e4
+      size: 191887
+    - path: euroleague_data/raw/quarter_data_2023.parquet
+      hash: md5
+      md5: b813e598908055a5eaec95a982856ad1
+      size: 13618
+    - path: euroleague_data/raw/shot_data_2023.parquet
+      hash: md5
+      md5: 22f7d08ae84ea53def1c46c6d3b3fdcc
+      size: 947024
+  feature_engineering:
+    cmd: uv run python -m src.euroleague_analysis.feature_engineering
+    deps:
+    - path: euroleague_data/raw/playbyplay_data_2023.parquet
+      hash: md5
+      md5: c8b3b0d45dac4ce4a0eac5f1f6bd2224
+      size: 1592319
+    - path: euroleague_data/raw/player_stats_2023.parquet
+      hash: md5
+      md5: 9955a857ccb25ce04bf556cf729b76e4
+      size: 191887
+    - path: euroleague_data/raw/shot_data_2023.parquet
+      hash: md5
+      md5: 22f7d08ae84ea53def1c46c6d3b3fdcc
+      size: 947024
+    - path: src/euroleague_analysis/feature_engineering
+      hash: md5
+      md5: 42614de6d421902a3d69914e9ebfc571.dir
+      size: 12842
+      nfiles: 8
+    - path: src/euroleague_analysis/sql_queries
+      hash: md5
+      md5: 253aedbfae60c8f5ce83891b2e2e9690.dir
+      size: 16048
+      nfiles: 3
+    outs:
+    - path: euroleague_data/features.duckdb
+      hash: md5
+      md5: 5099d716cb2aed9442409c0bd23a0391
+      size: 274432
+    - path: euroleague_data/features.parquet
+      hash: md5
+      md5: eef0b90ad35150a14d3716866d69d108
+      size: 207364
+    - path: feature_outputs.json
+      hash: md5
+      md5: 0056b3ffb8dd45806e29110d7b18e3b2
+      size: 156
