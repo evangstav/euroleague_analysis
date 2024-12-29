@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW shot_patterns AS
+CREATE OR REPLACE VIEW shot_patterns_{season} AS
 WITH game_shots AS (
     SELECT
         season,

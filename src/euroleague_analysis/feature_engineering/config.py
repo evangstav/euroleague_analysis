@@ -3,7 +3,7 @@
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import yaml
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class FeatureConfig:
     """Configuration for feature engineering"""
 
-    season: int
+    seasons: List[int]
     data_dir: Path
     db_path: str
     output_dir: Path
@@ -28,7 +28,7 @@ class FeatureConfig:
         """Create config from params dictionary"""
         data_dir = Path(params.get("data_dir", "euroleague_data"))
         return cls(
-            season=params.get("season", 2023),
+            seasons=params.get("seasons", [2023, 2024]),
             data_dir=data_dir,
             db_path=str(data_dir / "features.duckdb"),
             output_dir=data_dir,

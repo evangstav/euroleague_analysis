@@ -9,8 +9,9 @@ This guide is designed to help automated agents understand the codebase architec
 - Pattern: SQL-first approach using DuckDB
 - Key Components:
   - `views/`: SQL view definitions for feature transformations
-  - `builder.py`: Orchestrates feature creation
+  - `builder.py`: Orchestrates feature creation across seasons
   - `database.py`: Manages database connections and operations
+  - `config.py`: Handles multi-season configuration
 
 ### 2. Model Training
 - Location: `src/euroleague_analysis/train_model.py`
@@ -19,6 +20,7 @@ This guide is designed to help automated agents understand the codebase architec
   - Features are standardized before training
   - Model artifacts are saved using joblib
   - Metrics are tracked in models/metrics.json
+  - Handles data from multiple seasons
 
 ### 3. Prediction System
 - Location: `src/euroleague_analysis/predict_next_pir.py`
@@ -97,16 +99,19 @@ def format_prediction_report(predictions_df: pd.DataFrame, top_n: int = 20) -> s
    - Source: Euroleague API
    - Format: JSON → Parquet
    - Location: euroleague_data/raw/
+   - Supports multiple seasons (e.g., 2023, 2024)
 
 2. Feature Engineering
-   - Input: Raw parquet files
-   - Process: SQL transformations
-   - Output: Feature matrices
+   - Input: Raw parquet files from multiple seasons
+   - Process: Season-specific SQL transformations
+   - Output: Combined feature matrices
+   - Handles season boundaries in rolling calculations
 
 3. Model Training
-   - Input: Feature matrices
+   - Input: Combined feature matrices from all seasons
    - Process: Scikit-learn pipeline
    - Output: Model artifacts
+   - Uses full dataset across seasons
 
 4. Prediction Generation
    - Input: Model artifacts + new data
@@ -118,20 +123,22 @@ def format_prediction_report(predictions_df: pd.DataFrame, top_n: int = 20) -> s
 ### 1. SQL Transformations
 - Use CTEs for clarity
 - Filter out team totals early
-- Calculate rolling statistics where relevant
+- Calculate rolling statistics across seasons
 - Join player metadata when needed
 
 ### 2. Feature Engineering
 - Standardize numerical features
 - Handle missing values explicitly
 - Create rolling windows for time-series features
-- Maintain feature consistency between training and prediction
+- Maintain feature consistency between seasons
+- Handle season boundaries in rolling calculations
 
 ### 3. Model Pipeline
 - Always include feature scaling
 - Use consistent random seeds
 - Save all model artifacts together
 - Track metrics for comparison
+- Train on combined multi-season dataset
 
 ### 4. Prediction Formatting
 - Include player metadata
@@ -192,15 +199,18 @@ python -m src.euroleague_analysis.analyze_predictions
    - Document complex calculations
    - Consider performance
    - Test with sample data
+   - Handle season-specific views
 
 3. Feature Changes
    - Document feature importance
    - Maintain scaling
    - Consider missing data
    - Test feature stability
+   - Handle season transitions
 
 4. Model Changes
    - Track metrics
    - Save artifacts
    - Document parameters
    - Test predictions
+   - Validate across seasons

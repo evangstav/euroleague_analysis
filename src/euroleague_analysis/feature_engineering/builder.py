@@ -34,25 +34,28 @@ class FeatureBuilder:
         self.views = [
             RollingStatsView(),
             ShotPatternsView(),
-            PlayByPlayView(),  # Added PlayByPlayView
+            PlayByPlayView(),
         ]
         logger.info(f"Initialized {len(self.views)} feature views")
 
     def create_feature_views(self) -> None:
-        """Create all feature views"""
+        """Create all feature views for each season"""
         logger.info("Creating feature views...")
         self.db.connect()
 
         try:
-            format_args = {
-                "data_dir": self.config.data_dir,
-                "season": self.config.season,
-            }
+            for season in self.config.seasons:
+                logger.info(f"Processing season {season}")
+                format_args = {
+                    "data_dir": self.config.data_dir,
+                    "season": season,
+                }
 
-            for view in self.views:
-                logger.info(f"Creating view: {view.name}")
-                view.create(self.db, **format_args)
-                logger.info(f"Successfully created view: {view.name}")
+                for view in self.views:
+                    view_name = f"{view.name}_{season}"
+                    logger.info(f"Creating view: {view_name}")
+                    view.create(self.db, **format_args)
+                    logger.info(f"Successfully created view: {view_name}")
 
             logger.info("All feature views created successfully")
 
@@ -61,7 +64,7 @@ class FeatureBuilder:
             raise
 
     def create_final_features(self) -> pd.DataFrame:
-        """Generate final feature set"""
+        """Generate final feature set combining all seasons"""
         if not self.db.conn:
             raise RuntimeError("Database connection not initialized")
 
@@ -91,6 +94,7 @@ class FeatureBuilder:
             "database_file": self.config.db_path,
             "num_features": len(self._get_feature_columns()),
             "num_samples": self._get_num_samples(),
+            "seasons": self.config.seasons,
         }
 
         with open("feature_outputs.json", "w") as f:
@@ -104,67 +108,79 @@ class FeatureBuilder:
         logger.info("Closed database connection")
 
     def _get_final_features_query(self) -> str:
-        """Get the SQL query for final feature set"""
-        return """
-        SELECT
-            r.Season,
-            r.Phase,
-            r.Round,
-            r.Gamecode,
-            r.Player_ID,
-            -- Basic features
-            r.minutes_played,
-            r.is_starter,
-            r.is_home,
-            r.Points,
-            r.PIR,
-            r.fg_percentage,
-            r.ft_percentage,
-            r.ast_to_turnover,
-            
-            -- Rolling averages
-            r.pir_ma3,
-            r.points_ma3,
-            r.minutes_ma3,
-            
-            -- Shot patterns
-            s.fg_percentage as shot_fg_percentage,
-            s.fg_percentage_2pt,
-            s.fg_percentage_3pt,
-            s.three_point_rate,
-            s.fastbreak_rate,
-            s.second_chance_rate,
-            
-            -- Game flow features from playbyplay
-            p.clutch_plays,
-            p.clutch_scores,
-            p.first_quarter_plays,
-            p.fourth_quarter_plays,
-            p.close_game_plays,
-            p.unique_play_types,
-            p.consecutive_positive_plays,
-            
-            -- Usage patterns from playbyplay
-            p.assist_rate,
-            p.shot_attempt_rate,
-            p.defensive_play_rate,
-            p.turnover_rate,
-            
-            -- Form and consistency
-            r.improving_form,
-            r.pir_std3,
-            r.pir_vs_season_avg,
-            r.pir_rank_in_game
-            
-        FROM player_stats_features r
-        LEFT JOIN shot_patterns s
-            ON r.Player_ID = s.player_id
-            AND r.Gamecode = s.gamecode
-        LEFT JOIN playbyplay_features p
-            ON r.Player_ID = p.PLAYER_ID
-            AND r.Gamecode = p.Gamecode
-        WHERE r.minutes_played > 0
-        ORDER BY r.Season, r.Round, r.Gamecode, r.PIR DESC
+        """Get the SQL query for final feature set combining all seasons"""
+        season_queries = []
+
+        for season in self.config.seasons:
+            season_query = f"""
+            SELECT
+                r.Season,
+                r.Phase,
+                r.Round,
+                r.Gamecode,
+                r.Player_ID,
+                -- Basic features
+                r.minutes_played,
+                r.is_starter,
+                r.is_home,
+                r.Points,
+                r.PIR,
+                r.fg_percentage,
+                r.ft_percentage,
+                r.ast_to_turnover,
+                
+                -- Rolling averages
+                r.pir_ma3,
+                r.points_ma3,
+                r.minutes_ma3,
+                
+                -- Shot patterns
+                s.fg_percentage as shot_fg_percentage,
+                s.fg_percentage_2pt,
+                s.fg_percentage_3pt,
+                s.three_point_rate,
+                s.fastbreak_rate,
+                s.second_chance_rate,
+                
+                -- Game flow features from playbyplay
+                p.clutch_plays,
+                p.clutch_scores,
+                p.first_quarter_plays,
+                p.fourth_quarter_plays,
+                p.close_game_plays,
+                p.unique_play_types,
+                p.consecutive_positive_plays,
+                
+                -- Usage patterns from playbyplay
+                p.assist_rate,
+                p.shot_attempt_rate,
+                p.defensive_play_rate,
+                p.turnover_rate,
+                
+                -- Form and consistency
+                r.improving_form,
+                r.pir_std3,
+                r.pir_vs_season_avg,
+                r.pir_rank_in_game
+                
+            FROM player_stats_features_{season} r
+            LEFT JOIN shot_patterns_{season} s
+                ON r.Player_ID = s.player_id
+                AND r.Gamecode = s.gamecode
+            LEFT JOIN playbyplay_features_{season} p
+                ON r.Player_ID = p.PLAYER_ID
+                AND r.Gamecode = p.Gamecode
+            WHERE r.minutes_played > 0
+            """
+            season_queries.append(season_query)
+
+        combined_query = " UNION ALL ".join(season_queries)
+        return f"""
+        WITH all_seasons AS (
+            {combined_query}
+        )
+        SELECT * FROM all_seasons
+        ORDER BY Season, Round, Gamecode, PIR DESC
         """
 
     def _validate_features(self, df: pd.DataFrame) -> None:
@@ -234,9 +250,13 @@ class FeatureBuilder:
     def _get_num_samples(self) -> int:
         """Get number of samples in the dataset"""
         try:
-            with self.db.conn.cursor() as cursor:
-                cursor.execute("SELECT COUNT(*) FROM player_stats_features")
-                return cursor.fetchone()[0]
+            total = 0
+            for season in self.config.seasons:
+                count = self.db.conn.execute(
+                    f"SELECT COUNT(*) FROM player_stats_features_{season}"
+                ).fetchone()[0]
+                total += count
+            return total
         except Exception as e:
             logger.error(f"Error getting sample count: {e}")
             return 0

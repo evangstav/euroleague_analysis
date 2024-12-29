@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW playbyplay_features AS
+CREATE OR REPLACE VIEW playbyplay_features_{season} AS
 WITH consecutive_plays AS (
     SELECT 
         PLAYER_ID,

@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW player_stats_features AS
+CREATE OR REPLACE VIEW player_stats_features_{season} AS
 WITH player_stats AS (
     SELECT 
         *,

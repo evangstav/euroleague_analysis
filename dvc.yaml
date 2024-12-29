@@ -9,6 +9,11 @@ stages:
       - euroleague_data/raw/shot_data_2023.parquet
       - euroleague_data/raw/quarter_data_2023.parquet
       - euroleague_data/raw/end_quarter_data_2023.parquet
+      - euroleague_data/raw/player_stats_2024.parquet
+      - euroleague_data/raw/playbyplay_data_2024.parquet
+      - euroleague_data/raw/shot_data_2024.parquet
+      - euroleague_data/raw/quarter_data_2024.parquet
+      - euroleague_data/raw/end_quarter_data_2024.parquet
 
   feature_engineering:
     cmd: uv run python -m src.euroleague_analysis.feature_engineering
@@ -18,6 +23,9 @@ stages:
       - euroleague_data/raw/player_stats_2023.parquet
       - euroleague_data/raw/playbyplay_data_2023.parquet
       - euroleague_data/raw/shot_data_2023.parquet
+      - euroleague_data/raw/player_stats_2024.parquet
+      - euroleague_data/raw/playbyplay_data_2024.parquet
+      - euroleague_data/raw/shot_data_2024.parquet
     outs:
       - euroleague_data/features.parquet
       - euroleague_data/features.duckdb

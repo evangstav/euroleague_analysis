@@ -1,10 +1,10 @@
 extract:
-  season: 2023
+  seasons: [2023, 2024]
   data_dir: "euroleague_data"
   competition_code: "E"
 
 features:
-  season: 2023
+  seasons: [2023, 2024]
   data_dir: "euroleague_data"
   rolling_windows: [3, 5]
   min_minutes: 0
