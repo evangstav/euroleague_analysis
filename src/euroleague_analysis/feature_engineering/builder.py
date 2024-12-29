@@ -33,9 +33,7 @@ class FeatureBuilder:
         self.views = [
             RollingStatsView(),
             ShotPatternsView(),
-            GameContextView(),
-            PlayByPlayView(),
-            PlayerTiersView(),
+            PlayByPlayView(),  # Added PlayByPlayView
         ]
         logger.info(f"Initialized {len(self.views)} feature views")
 
@@ -107,26 +105,63 @@ class FeatureBuilder:
     def _get_final_features_query(self) -> str:
         """Get the SQL query for final feature set"""
         return """
-        SELECT 
+        SELECT
             r.Season,
             r.Phase,
             r.Round,
             r.Gamecode,
             r.Player_ID,
-            -- ... rest of the query ...
+            -- Basic features
+            r.minutes_played,
+            r.is_starter,
+            r.is_home,
+            r.Points,
+            r.PIR,
+            r.fg_percentage,
+            r.ft_percentage,
+            r.ast_to_turnover,
+            
+            -- Rolling averages
+            r.pir_ma3,
+            r.points_ma3,
+            r.minutes_ma3,
+            
+            -- Shot patterns
+            s.fg_percentage as shot_fg_percentage,
+            s.fg_percentage_2pt,
+            s.fg_percentage_3pt,
+            s.three_point_rate,
+            s.fastbreak_rate,
+            s.second_chance_rate,
+            
+            -- Game flow features from playbyplay
+            p.clutch_plays,
+            p.clutch_scores,
+            p.first_quarter_plays,
+            p.fourth_quarter_plays,
+            p.close_game_plays,
+            p.unique_play_types,
+            p.consecutive_positive_plays,
+            
+            -- Usage patterns from playbyplay
+            p.assist_rate,
+            p.shot_attempt_rate,
+            p.defensive_play_rate,
+            p.turnover_rate,
+            
+            -- Form and consistency
+            r.improving_form,
+            r.pir_std3,
+            r.pir_vs_season_avg,
+            r.pir_rank_in_game
+            
         FROM player_stats_features r
-        LEFT JOIN shot_patterns s 
-            ON r.Player_ID = s.Player_ID 
-            AND r.Gamecode = s.Gamecode
-        LEFT JOIN playbyplay_features p 
-            ON r.Player_ID = p.PLAYER_ID 
+        LEFT JOIN shot_patterns s
+            ON r.Player_ID = s.player_id
+            AND r.Gamecode = s.gamecode
+        LEFT JOIN playbyplay_features p
+            ON r.Player_ID = p.PLAYER_ID
             AND r.Gamecode = p.Gamecode
-        LEFT JOIN game_context g 
-            ON r.Gamecode = g.Gamecode
-            AND r.Season = g.Season
-        LEFT JOIN player_tiers_view h
-            ON r.Player_ID = h.Player_ID
-            AND r.Gamecode = h.Gamecode
         WHERE r.minutes_played > 0
         ORDER BY r.Season, r.Round, r.Gamecode, r.PIR DESC
         """
@@ -154,11 +189,29 @@ class FeatureBuilder:
 
     def _get_feature_columns(self) -> List[str]:
         """Get list of feature columns"""
-        # This should return the actual feature columns used in the model
         return [
-            "PIR", "minutes_played", "Points", "fg_percentage", 
-            "ft_percentage", "ast_to_turnover", "pir_ma3", 
-            "points_ma3", "minutes_ma3", "is_starter", "is_home"
+            # Basic features
+            "minutes_played", "is_starter", "is_home", "Points", "PIR",
+            "fg_percentage", "ft_percentage", "ast_to_turnover",
+            
+            # Rolling averages
+            "pir_ma3", "points_ma3", "minutes_ma3",
+            
+            # Shot patterns
+            "shot_fg_percentage", "fg_percentage_2pt", "fg_percentage_3pt",
+            "three_point_rate", "fastbreak_rate", "second_chance_rate",
+            
+            # Game flow features
+            "clutch_plays", "clutch_scores", "first_quarter_plays",
+            "fourth_quarter_plays", "close_game_plays", "unique_play_types",
+            "consecutive_positive_plays",
+            
+            # Usage patterns
+            "assist_rate", "shot_attempt_rate", "defensive_play_rate",
+            "turnover_rate",
+            
+            # Form and consistency
+            "improving_form", "pir_std3", "pir_vs_season_avg", "pir_rank_in_game"
         ]
 
     def _get_num_samples(self) -> int:

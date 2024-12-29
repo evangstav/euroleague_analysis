@@ -7,4 +7,3 @@ __pycache__/
 .aider*
 .uv/
 .dvc/
-/dvc.lock

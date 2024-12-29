@@ -5,14 +5,12 @@ from dataclasses import dataclass
 from typing import Dict, Any
 import yaml
 import logging
-import duckdb
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class FeatureConfig:
@@ -33,7 +31,6 @@ class FeatureConfig:
             db_path=str(data_dir / "features.duckdb"),
             output_dir=data_dir,
         )
-
 
 def load_params(params_path: str = "params.yaml") -> Dict[str, Any]:
     """Load parameters from params.yaml"""

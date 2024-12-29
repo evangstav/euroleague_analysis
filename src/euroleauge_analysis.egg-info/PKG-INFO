@@ -1,0 +1,71 @@
+Metadata-Version: 2.1
+Name: euroleauge-analysis
+Version: 0.1.0
+Summary: Data analysis pipeline for Euroleague basketball
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+Requires-Dist: duckdb>=1.1.3
+Requires-Dist: euroleague-api>=0.0.13
+Requires-Dist: ipython>=8.30.0
+Requires-Dist: matplotlib>=3.9.3
+Requires-Dist: pyarrow>=18.1.0
+Requires-Dist: pymc>=5.19.1
+Requires-Dist: pyyaml>=6.0.2
+Requires-Dist: scikit-learn>=1.5.2
+Requires-Dist: seaborn>=0.13.2
+Requires-Dist: dvc>=3.38.1
+Provides-Extra: dev
+Requires-Dist: black>=23.12.1; extra == "dev"
+Requires-Dist: isort>=5.13.2; extra == "dev"
+Requires-Dist: pytest>=7.4.3; extra == "dev"
+
+# Euroleague Analysis
+
+A data analysis pipeline for Euroleague basketball using DVC and UV.
+
+## Setup
+
+1. Install UV:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+2. Create virtual environment and install dependencies:
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install -e .
+```
+
+3. Initialize DVC:
+```bash
+dvc init
+dvc add euroleague_data/
+```
+
+## Pipeline Stages
+
+The analysis pipeline consists of several stages managed by DVC:
+
+1. `extract`: Collect data from Euroleague API
+2. `features`: Engineer features from raw data
+3. `train`: Train prediction model
+4. `analyze`: Analyze model predictions
+5. `train_pgm`: Train probabilistic graphical model
+6. `analyze_pgm`: Analyze PGM results
+
+Run the full pipeline:
+```bash
+dvc repro
+```
+
+Run specific stages:
+```bash
+dvc repro <stage_name>
+```
+
+## Development
+
+- Use UV for dependency management
+- Follow DVC best practices for data versioning
+- Keep params.yaml updated for configuration

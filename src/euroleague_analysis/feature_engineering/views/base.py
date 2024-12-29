@@ -15,6 +15,7 @@ class SQLView:
         
     def create(self, db, **format_args):
         """Create the view in the database"""
-        sql_path = Path("sql_queries") / self.sql_file
+        package_dir = Path(__file__).parent.parent.parent
+        sql_path = package_dir / "sql_queries" / self.sql_file
         db.execute_sql_file(sql_path, **format_args)
         logger.info(f"Created {self.name} view")
