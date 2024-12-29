@@ -24,3 +24,20 @@ stages:
     metrics:
       - feature_outputs.json:
           cache: false
+
+  train_model:
+    cmd: uv run python -m src.euroleague_analysis.train_model
+    deps:
+      - src/euroleague_analysis/train_model.py
+      - src/euroleague_analysis/model_config.py
+      - euroleague_data/features.parquet
+      - params.yaml
+    outs:
+      - models/pir_predictor.joblib
+      - models/scaler.joblib
+      - models/plots/learning_curves.png
+      - models/plots/prediction_scatter.png
+      - models/plots/cv_scores_distribution.png
+    metrics:
+      - models/metrics.json:
+          cache: false

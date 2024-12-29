@@ -335,3 +335,47 @@ stages:
       hash: md5
       md5: 0056b3ffb8dd45806e29110d7b18e3b2
       size: 156
+  train_model:
+    cmd: uv run python -m src.euroleague_analysis.train_model
+    deps:
+    - path: euroleague_data/features.parquet
+      hash: md5
+      md5: eef0b90ad35150a14d3716866d69d108
+      size: 207364
+    - path: params.yaml
+      hash: md5
+      md5: 39bccc5e35085f5131bc62f845badf16
+      size: 751
+    - path: src/euroleague_analysis/model_config.py
+      hash: md5
+      md5: 060e1e5292b27e20a14d27499a0bea07
+      size: 1577
+    - path: src/euroleague_analysis/train_model.py
+      hash: md5
+      md5: aaa68d53d1656d1204d01f3cdaa5976e
+      size: 9794
+    outs:
+    - path: models/metrics.json
+      hash: md5
+      md5: aade823b3e597c168e53da05cd8d5e29
+      size: 735
+    - path: models/pir_predictor.joblib
+      hash: md5
+      md5: f9e2d29349ded6b9db8afde95e61be38
+      size: 239816
+    - path: models/plots/cv_scores_distribution.png
+      hash: md5
+      md5: dce51fb6e318e0cd9f053f80f9a279dd
+      size: 27168
+    - path: models/plots/learning_curves.png
+      hash: md5
+      md5: 9be1a3427f5cc9a47e2817af8275af47
+      size: 38100
+    - path: models/plots/prediction_scatter.png
+      hash: md5
+      md5: ce21fa534a638ffb4d69c5d915df582e
+      size: 110545
+    - path: models/scaler.joblib
+      hash: md5
+      md5: ba22cfe834f746e6ed23bc573af23ef4
+      size: 2207
