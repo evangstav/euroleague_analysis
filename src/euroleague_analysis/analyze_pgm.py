@@ -2,22 +2,21 @@
 Analysis of Probabilistic Graphical Model predictions for PIR.
 """
 
-from math import inf
-from typing import Counter
-import pandas as pd
-import numpy as np
-from pathlib import Path
-import logging
-import yaml
 import json
+import logging
+from math import inf
+from pathlib import Path
+from typing import Counter
+
 import arviz as az
 import joblib
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pymc as pm
 import seaborn as sns
 import xarray as xr
-
-import pymc as pm
-
+import yaml
 from pymc import HalfCauchy, Model, Normal, sample
 
 print(f"Running on PyMC v{pm.__version__}")

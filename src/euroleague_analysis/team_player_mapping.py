@@ -3,10 +3,11 @@ Module for mapping teams and players for a given season.
 """
 
 import logging
-import yaml
 from pathlib import Path
+from typing import Any, Dict
+
 import pandas as pd
-from typing import Dict, Any
+import yaml
 from euroleague_api.player_stats import PlayerStats
 
 # Configure logging

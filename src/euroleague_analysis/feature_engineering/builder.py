@@ -1,20 +1,21 @@
 """Feature engineering builder module."""
 
-import logging
 import json
-import pandas as pd
+import logging
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 import numpy as np
+import pandas as pd
 
 from .config import FeatureConfig
 from .database import FeatureDatabase
 from .views.stats import (
-    RollingStatsView,
-    ShotPatternsView,
     GameContextView,
     PlayByPlayView,
     PlayerTiersView,
+    RollingStatsView,
+    ShotPatternsView,
 )
 
 logger = logging.getLogger(__name__)
@@ -68,10 +69,10 @@ class FeatureBuilder:
         try:
             # Execute final features query
             df = self.db.query_to_df(self._get_final_features_query())
-            
+
             # Validate features
             self._validate_features(df)
-            
+
             # Save to parquet
             output_path = self.config.output_dir / "features.parquet"
             df.to_parquet(str(output_path))
@@ -169,49 +170,65 @@ class FeatureBuilder:
     def _validate_features(self, df: pd.DataFrame) -> None:
         """Validate the generated features"""
         logger.info("Validating features...")
-        
+
         # Check for missing values
         missing_values = df.isnull().sum().sum()
         if missing_values > 0:
             logger.warning(f"Found {missing_values} missing values in features")
-            
+
         # Check for infinite values
         infinite_values = np.isinf(df.select_dtypes(include=[np.number])).sum().sum()
         if infinite_values > 0:
             logger.warning(f"Found {infinite_values} infinite values in features")
-            
+
         # Check for duplicate rows
         duplicates = df.duplicated().sum()
         if duplicates > 0:
             logger.warning(f"Found {duplicates} duplicate rows in features")
-            
+
         logger.info("Feature validation completed")
 
     def _get_feature_columns(self) -> List[str]:
         """Get list of feature columns"""
         return [
             # Basic features
-            "minutes_played", "is_starter", "is_home", "Points", "PIR",
-            "fg_percentage", "ft_percentage", "ast_to_turnover",
-            
+            "minutes_played",
+            "is_starter",
+            "is_home",
+            "Points",
+            "PIR",
+            "fg_percentage",
+            "ft_percentage",
+            "ast_to_turnover",
             # Rolling averages
-            "pir_ma3", "points_ma3", "minutes_ma3",
-            
+            "pir_ma3",
+            "points_ma3",
+            "minutes_ma3",
             # Shot patterns
-            "shot_fg_percentage", "fg_percentage_2pt", "fg_percentage_3pt",
-            "three_point_rate", "fastbreak_rate", "second_chance_rate",
-            
+            "shot_fg_percentage",
+            "fg_percentage_2pt",
+            "fg_percentage_3pt",
+            "three_point_rate",
+            "fastbreak_rate",
+            "second_chance_rate",
             # Game flow features
-            "clutch_plays", "clutch_scores", "first_quarter_plays",
-            "fourth_quarter_plays", "close_game_plays", "unique_play_types",
+            "clutch_plays",
+            "clutch_scores",
+            "first_quarter_plays",
+            "fourth_quarter_plays",
+            "close_game_plays",
+            "unique_play_types",
             "consecutive_positive_plays",
-            
             # Usage patterns
-            "assist_rate", "shot_attempt_rate", "defensive_play_rate",
+            "assist_rate",
+            "shot_attempt_rate",
+            "defensive_play_rate",
             "turnover_rate",
-            
             # Form and consistency
-            "improving_form", "pir_std3", "pir_vs_season_avg", "pir_rank_in_game"
+            "improving_form",
+            "pir_std3",
+            "pir_vs_season_avg",
+            "pir_rank_in_game",
         ]
 
     def _get_num_samples(self) -> int:

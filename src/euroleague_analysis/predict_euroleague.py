@@ -2,15 +2,16 @@
 Script to generate predictions for upcoming Euroleague matches.
 """
 
-import logging
-import joblib
 import json
+import logging
 from pathlib import Path
-from typing import List, Tuple, Dict, Any
-import pandas as pd
+from typing import Any, Dict, List, Tuple
+
+import joblib
 import numpy as np
-from predict_next_matches import generate_matchup_features
+import pandas as pd
 from model_config import FEATURE_COLUMNS
+from predict_next_matches import generate_matchup_features
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

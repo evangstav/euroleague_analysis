@@ -1,9 +1,9 @@
 README.md
 pyproject.toml
+src/euroleague_analysis/__init__.py
 src/euroleague_analysis/analyze_pgm.py
 src/euroleague_analysis/analyze_predictions.py
 src/euroleague_analysis/euroleague_data_collector.py
-src/euroleague_analysis/feature_engineering.py
 src/euroleague_analysis/model_config.py
 src/euroleague_analysis/predict_euroleague.py
 src/euroleague_analysis/predict_next_matches.py

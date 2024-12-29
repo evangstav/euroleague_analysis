@@ -1,8 +1,12 @@
 """Main entry point for feature engineering."""
 
 import logging
-from src.euroleague_analysis.feature_engineering.config import FeatureConfig, load_params
+
 from src.euroleague_analysis.feature_engineering.builder import FeatureBuilder
+from src.euroleague_analysis.feature_engineering.config import (
+    FeatureConfig,
+    load_params,
+)
 
 logger = logging.getLogger(__name__)
 

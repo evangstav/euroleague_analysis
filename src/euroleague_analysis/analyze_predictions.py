@@ -2,17 +2,18 @@
 Analyze model predictions and generate insights about model performance.
 """
 
-import pandas as pd
-import numpy as np
-from pathlib import Path
-import logging
-import yaml
 import json
+import logging
+from pathlib import Path
+
 import joblib
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
-from model_config import FEATURE_COLUMNS, TARGET_COLUMN, prepare_features, ID_COLUMNS
+import yaml
+from model_config import FEATURE_COLUMNS, ID_COLUMNS, TARGET_COLUMN, prepare_features
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -244,4 +245,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

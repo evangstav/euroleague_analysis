@@ -3,56 +3,41 @@ Shared configuration for model training and analysis.
 """
 
 FEATURE_COLUMNS = [
-    # Player performance metrics
-    "PIR",
-    "Points",
-    "minutes_played",
-    "fg_percentage",
-    "ft_percentage",
-    "three_point_attempt_rate",
-    "ast_to_turnover",
-    "rebounds_per_minute",
-    "defensive_plays_per_minute",
-    # Rolling averages
+    # Rolling averages (past performance)
     "minutes_ma3",
     "points_ma3",
     "pir_ma3",
-    "fg_percentage_ma3",
-    "usage_ma3",
-    # Form and consistency
-    "pir_std3",
-    "pir_rank_in_game",
-    "pir_vs_season_avg",
-    "improving_form",
-    # Efficiency metrics
-    "fastbreak_ppp",
-    "second_chance_ppp",
-    "fastbreak_ppp_ma3",
-    # Shot zone preferences
-    "zone_a_rate",
-    "zone_b_rate",
-    "zone_c_rate",
-    "zone_d_rate",
-    "zone_e_rate",
-    "zone_f_rate",
-    "zone_g_rate",
-    "zone_h_rate",
-    "zone_i_rate",
-    "zone_j_rate",
+    # Current game basic stats
+    "minutes_played",
+    "Points",
+    # Shooting efficiency
+    "fg_percentage",
+    "ft_percentage",
+    "fg_percentage_2pt",
+    "fg_percentage_3pt",
+    "three_point_rate",
+    # Game situation stats
+    "fastbreak_rate",
+    "second_chance_rate",
+    "clutch_plays",
+    "clutch_scores",
     # Game involvement
-    "clutch_play_rate",
-    "close_game_play_rate",
-    "game_involvement_span",
-    "q1_play_rate",
-    "q2_play_rate",
-    "q3_play_rate",
-    "q4_play_rate",
-    # Team performance context
-    "points_ma3",
-    "point_differential_ma3",
-    "game_volatility",
-    "margin_of_victory",
-    # Game context flags
+    "first_quarter_plays",
+    "fourth_quarter_plays",
+    "close_game_plays",
+    "consecutive_positive_plays",
+    # Play style metrics
+    "assist_rate",
+    "shot_attempt_rate",
+    "defensive_play_rate",
+    "ast_to_turnover",
+    "turnover_rate",
+    # Form indicators
+    "improving_form",
+    "pir_std3",
+    "pir_vs_season_avg",
+    "pir_rank_in_game",
+    # Game context
     "is_starter",
     "is_home",
 ]
