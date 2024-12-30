@@ -3,6 +3,13 @@
 from .base import SQLView
 
 
+class PositionMatchupView(SQLView):
+    """Position matchup features view"""
+
+    def __init__(self):
+        super().__init__("position_matchup", "position_matchup_features.sql")
+
+
 class RollingStatsView(SQLView):
     """Rolling statistics view"""
 

@@ -14,6 +14,7 @@ from .views.stats import (
     GameContextView,
     PlayByPlayView,
     PlayerTiersView,
+    PositionMatchupView,
     RollingStatsView,
     ShotPatternsView,
 )
@@ -35,6 +36,7 @@ class FeatureBuilder:
             RollingStatsView(),
             ShotPatternsView(),
             PlayByPlayView(),
+            PositionMatchupView(),
         ]
         logger.info(f"Initialized {len(self.views)} feature views")
 
@@ -161,7 +163,21 @@ class FeatureBuilder:
                 r.improving_form,
                 r.pir_std3,
                 r.pir_vs_season_avg,
-                r.pir_rank_in_game
+                r.pir_rank_in_game,
+                
+                -- Position matchup features
+                m.avg_pir_vs_guards,
+                m.avg_pir_vs_forwards,
+                m.avg_pir_vs_centers,
+                m.guard_matchup_edge,
+                m.forward_matchup_edge,
+                m.center_matchup_edge,
+                m.guard_dominance_rate,
+                m.forward_dominance_rate,
+                m.center_dominance_rate,
+                m.position_matchup_volatility,
+                m.best_matchup_differential,
+                m.recent_matchup_performance
                 
             FROM player_stats_features_{season} r
             LEFT JOIN shot_patterns_{season} s
@@ -170,6 +186,9 @@ class FeatureBuilder:
             LEFT JOIN playbyplay_features_{season} p
                 ON r.Player_ID = p.PLAYER_ID
                 AND r.Gamecode = p.Gamecode
+            LEFT JOIN position_matchup_features_{season} m
+                ON r.Player_ID = m.Player_ID
+                AND r.Gamecode = m.Gamecode
             WHERE r.minutes_played > 0
             """
             season_queries.append(season_query)
@@ -245,6 +264,19 @@ class FeatureBuilder:
             "pir_std3",
             "pir_vs_season_avg",
             "pir_rank_in_game",
+            # Position matchup features
+            "avg_pir_vs_guards",
+            "avg_pir_vs_forwards",
+            "avg_pir_vs_centers",
+            "guard_matchup_edge",
+            "forward_matchup_edge",
+            "center_matchup_edge",
+            "guard_dominance_rate",
+            "forward_dominance_rate",
+            "center_dominance_rate",
+            "position_matchup_volatility",
+            "best_matchup_differential",
+            "recent_matchup_performance",
         ]
 
     def _get_num_samples(self) -> int:
