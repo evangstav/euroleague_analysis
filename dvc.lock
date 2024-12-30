@@ -274,8 +274,8 @@ stages:
     deps:
     - path: src/euroleague_analysis/euroleague_data_collector.py
       hash: md5
-      md5: 51ea8000ca60bdd7ab854e60aa956523
-      size: 5070
+      md5: b4fb3b03e29bb0397d4dfb8a19df36a9
+      size: 5114
     outs:
     - path: euroleague_data/raw/end_quarter_data_2023.parquet
       hash: md5
@@ -346,34 +346,34 @@ stages:
       size: 480626
     - path: src/euroleague_analysis/feature_engineering
       hash: md5
-      md5: 6232d291128f49a1aee3654e8d23903e.dir
-      size: 13914
+      md5: 944123eebd02cff237bb1f94c7a4faca.dir
+      size: 15342
       nfiles: 8
     - path: src/euroleague_analysis/sql_queries
       hash: md5
-      md5: 395efe4e984f1af8cb43e46f4a7fa0fd.dir
-      size: 16075
-      nfiles: 3
+      md5: 64fe21a71caed02dc9db8802a6c3e84a.dir
+      size: 23597
+      nfiles: 4
     outs:
     - path: euroleague_data/features.duckdb
       hash: md5
-      md5: 8efc4695759cd3a671674e4b78d5dd12
+      md5: 329a4421276bcf34a022a1648900de0d
       size: 274432
     - path: euroleague_data/features.parquet
       hash: md5
-      md5: 7bc4a40e7fcc7aeda8f59936bcbec9fe
-      size: 282164
+      md5: f56c1c0161b0023413c401bcfee3d6af
+      size: 858829
     - path: feature_outputs.json
       hash: md5
-      md5: 0f21fc47f99ce5440b027313e3618862
+      md5: bd3425f70d666b1dd099c20350c26284
       size: 196
   train_model:
     cmd: uv run python -m src.euroleague_analysis.train_model
     deps:
     - path: euroleague_data/features.parquet
       hash: md5
-      md5: 7bc4a40e7fcc7aeda8f59936bcbec9fe
-      size: 282164
+      md5: f56c1c0161b0023413c401bcfee3d6af
+      size: 858829
     - path: params.yaml
       hash: md5
       md5: 440cfc99523c04fd4fdc7be06847eb47
@@ -389,25 +389,25 @@ stages:
     outs:
     - path: models/metrics.json
       hash: md5
-      md5: 2a9d08a2f319ef1f3ab03544523efa3f
-      size: 739
+      md5: 5f931d5971f6ee9a5c1662a1b79a5d49
+      size: 750
     - path: models/pir_predictor.joblib
       hash: md5
-      md5: 35e2b89f814de0bcceae01effa821b4c
-      size: 194456
+      md5: f93fd8e5ce6a9413be8e249dfd7cf4a0
+      size: 337832
     - path: models/plots/cv_scores_distribution.png
       hash: md5
-      md5: b680fe745a9286befcffa88bd026655c
-      size: 28673
+      md5: 27eface6b07b5fefc66c6e8217b8e880
+      size: 28881
     - path: models/plots/learning_curves.png
       hash: md5
-      md5: b006df0e53107a5755ceee91c0332b48
-      size: 38826
+      md5: 2c2cf125a4de1ebeae74d9b74532932c
+      size: 41005
     - path: models/plots/prediction_scatter.png
       hash: md5
-      md5: bc57974799dff02938ada8c49add6de6
-      size: 126970
+      md5: e2f467afea1d6399784bf41d7c12bca7
+      size: 148840
     - path: models/scaler.joblib
       hash: md5
-      md5: 0d5a74e65bcf935d11b9541ce117e855
+      md5: 95b8dcde764f42065bbe343293bbb322
       size: 2207
