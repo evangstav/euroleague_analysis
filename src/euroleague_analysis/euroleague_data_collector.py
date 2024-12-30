@@ -5,7 +5,7 @@ Euroleague Data Collection Module with DVC pipeline support
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import yaml
 from euroleague_api.boxscore_data import BoxScoreData
@@ -113,22 +113,31 @@ def setup_directories(data_dir: str):
 def main():
     # Load parameters
     params = load_params()
-    season = params.get("season", 2023)
+    seasons = params.get("seasons", [2023, 2024])
     data_dir = params.get("data_dir", "euroleague_data")
     competition_code = params.get("competition_code", "E")
 
     # Setup directories
     data_path = setup_directories(data_dir)
 
-    # Extract all data types
+    # Extract all data types for each season
     outputs = {}
-    outputs.update(extract_box_score_data(season, data_path, competition_code))
-    outputs.update(extract_shot_data(season, data_path, competition_code))
-    outputs.update(extract_playbyplay_data(season, data_path, competition_code))
+    for season in seasons:
+        logger.info(f"Processing season {season}")
+        season_outputs = {}
+        season_outputs.update(
+            extract_box_score_data(season, data_path, competition_code)
+        )
+        season_outputs.update(extract_shot_data(season, data_path, competition_code))
+        season_outputs.update(
+            extract_playbyplay_data(season, data_path, competition_code)
+        )
+        outputs[str(season)] = season_outputs
+        logger.info(f"Completed processing season {season}")
 
     # Save outputs for DVC
     with open("extract_outputs.json", "w") as f:
-        json.dump(outputs, f)
+        json.dump(outputs, f, indent=2)
 
 
 if __name__ == "__main__":

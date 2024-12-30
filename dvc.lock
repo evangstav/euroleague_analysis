@@ -380,8 +380,8 @@ stages:
       size: 769
     - path: src/euroleague_analysis/model_config.py
       hash: md5
-      md5: 01488b19e6094477e911f236855811cf
-      size: 1527
+      md5: 3e36ccc353ec487376282694ba9c4685
+      size: 2829
     - path: src/euroleague_analysis/train_model.py
       hash: md5
       md5: 81e5498d60181a46342b394e7267e90b
