@@ -51,9 +51,28 @@ def get_latest_features(data_dir: Path = Path("euroleague_data")) -> pd.DataFram
         raise
 
 
+from sklearn.inspection import permutation_importance
+
+
+def get_feature_importance(model, X: pd.DataFrame, y: pd.Series) -> pd.DataFrame:
+    """Get feature importance information from the model using permutation importance."""
+    try:
+        # Calculate permutation importance
+        r = permutation_importance(model, X, y, n_repeats=10, random_state=42)
+
+        # Create DataFrame with mean importance scores
+        importance_df = pd.DataFrame(
+            {"feature": X.columns, "importance": r.importances_mean}
+        )
+        return importance_df.sort_values("importance", ascending=False)
+    except Exception as e:
+        logger.error(f"Error calculating feature importance: {e}")
+        return pd.DataFrame()
+
+
 def predict_next_pir(
     model, scaler, features_df: pd.DataFrame, season: int = 2024
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Generate PIR predictions for all players."""
     try:
         # Get the latest round
@@ -136,39 +155,62 @@ def predict_next_pir(
         # Sort by predicted PIR
         results_df = results_df.sort_values("PredictedPIR", ascending=False)
 
+        # Get feature importance using the current data
+        X = player_df[FEATURE_COLUMNS]
+        y = player_df["PIR"]  # Using current PIR as target
+        importance_df = get_feature_importance(model, X, y)
+
         logger.info(f"Generated predictions for {len(results_df)} players")
-        return results_df
+        return results_df, importance_df
     except Exception as e:
         logger.error(f"Error generating predictions: {e}")
         raise
 
 
-def save_predictions(predictions_df: pd.DataFrame, output_dir: Path):
-    """Save predictions to JSON and CSV formats."""
+def save_predictions(
+    predictions_df: pd.DataFrame, importance_df: pd.DataFrame, output_dir: Path
+):
+    """Save predictions and feature importance to JSON and CSV formats."""
     try:
         # Create output directory
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Save as JSON
+        # Save predictions
         predictions_dict = predictions_df.to_dict(orient="records")
         json_path = output_dir / "player_predictions.json"
         with open(json_path, "w") as f:
             json.dump(predictions_dict, f, indent=2)
-
-        # Save as CSV
         csv_path = output_dir / "player_predictions.csv"
         predictions_df.to_csv(csv_path, index=False)
 
-        logger.info(f"Saved predictions to {output_dir}")
+        # Save feature importance
+        if not importance_df.empty:
+            importance_dict = importance_df.to_dict(orient="records")
+            importance_json_path = output_dir / "feature_importance.json"
+            with open(importance_json_path, "w") as f:
+                json.dump(importance_dict, f, indent=2)
+            importance_csv_path = output_dir / "feature_importance.csv"
+            importance_df.to_csv(importance_csv_path, index=False)
+
+        logger.info(f"Saved predictions and feature importance to {output_dir}")
     except Exception as e:
         logger.error(f"Error saving predictions: {e}")
         raise
 
 
-def format_prediction_report(predictions_df: pd.DataFrame, top_n: int = 20) -> str:
-    """Format top predictions into a readable report."""
+def format_prediction_report(
+    predictions_df: pd.DataFrame, importance_df: pd.DataFrame, top_n: int = 20
+) -> str:
+    """Format top predictions and feature importance into a readable report."""
     next_round = predictions_df["Round"].iloc[0]
     report = [f"\n=== Top Players by Predicted PIR for Round {next_round} ===\n"]
+
+    # Add feature importance section if available
+    if not importance_df.empty:
+        report.append("\n=== Top 5 Most Important Features ===\n")
+        for _, row in importance_df.head(5).iterrows():
+            report.append(f"{row['feature']}: {row['importance']:.3f}")
+        report.append("\n=== Player Predictions ===\n")
 
     for _, row in predictions_df.head(top_n).iterrows():
         report.append(
@@ -198,14 +240,16 @@ def main():
         # Get latest features
         features_df = get_latest_features(data_dir)
 
-        # Generate predictions for 2024 season
-        predictions_df = predict_next_pir(model, scaler, features_df, season=2024)
+        # Generate predictions and feature importance for 2024 season
+        predictions_df, importance_df = predict_next_pir(
+            model, scaler, features_df, season=2024
+        )
 
-        # Save predictions
-        save_predictions(predictions_df, output_dir)
+        # Save predictions and feature importance
+        save_predictions(predictions_df, importance_df, output_dir)
 
         # Generate and print report
-        report = format_prediction_report(predictions_df)
+        report = format_prediction_report(predictions_df, importance_df)
         print(report)
 
         logger.info("Prediction pipeline completed successfully")

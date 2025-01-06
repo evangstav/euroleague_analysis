@@ -14,6 +14,7 @@ import pandas as pd
 import seaborn as sns
 import yaml
 from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.inspection import permutation_importance
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import TimeSeriesSplit, learning_curve
 from sklearn.preprocessing import StandardScaler
@@ -93,23 +94,33 @@ class PIRPredictor:
         plt.savefig(output_dir / "learning_curves.png")
         plt.close()
 
-    def plot_feature_importance(self, X: pd.DataFrame, output_dir: Path):
-        """Plot feature importance."""
+    def plot_feature_importance(self, X: pd.DataFrame, y: pd.Series, output_dir: Path):
+        """Plot feature importance using permutation importance."""
         logger.info("Generating feature importance plot...")
 
-        if hasattr(self.model, "feature_importances_"):
+        try:
+            # Calculate permutation importance
+            r = permutation_importance(self.model, X, y, n_repeats=10, random_state=42)
+
+            # Create DataFrame with mean importance scores
             importance_df = pd.DataFrame(
-                {"feature": X.columns, "importance": self.model.feature_importances_}
+                {"feature": X.columns, "importance": r.importances_mean}
             )
             importance_df = importance_df.sort_values("importance", ascending=True)
 
             plt.figure(figsize=(10, 8))
             sns.barplot(data=importance_df, y="feature", x="importance")
-            plt.title("Feature Importance")
+            plt.title("Feature Importance (Permutation)")
+            plt.xlabel("Mean Importance")
             plt.tight_layout()
             output_dir.mkdir(parents=True, exist_ok=True)
             plt.savefig(output_dir / "feature_importance.png")
             plt.close()
+
+            # Save raw importance scores
+            importance_df.to_csv(output_dir / "feature_importance.csv", index=False)
+        except Exception as e:
+            logger.error(f"Error generating feature importance plot: {e}")
 
     def evaluate(self, X: pd.DataFrame, y: pd.Series, df: pd.DataFrame) -> dict:
         """
@@ -242,8 +253,9 @@ def main():
     # Generate learning curves
     predictor.plot_learning_curves(X, y, plots_dir)
 
-    # Generate feature importance plot
-    predictor.plot_feature_importance(X, plots_dir)
+    # Generate feature importance plot using scaled features
+    X_scaled = predictor.scaler.transform(X)
+    predictor.plot_feature_importance(X_scaled, y, plots_dir)
 
     # Evaluate model
     evaluation = predictor.evaluate(X, y, df_processed)
