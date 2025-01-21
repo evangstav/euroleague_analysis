@@ -2,7 +2,7 @@
   "features_file": "euroleague_data/features.parquet",
   "database_file": "euroleague_data/features.duckdb",
   "num_features": 44,
-  "num_samples": 11624,
+  "num_samples": 12474,
   "seasons": [
     2023,
     2024

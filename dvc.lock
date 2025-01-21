@@ -283,40 +283,40 @@ stages:
       size: 14145
     - path: euroleague_data/raw/end_quarter_data_2024.parquet
       hash: md5
-      md5: 1b51b835be6432cad98c01d542eb4a17
-      size: 10315
+      md5: f9ea8890768b16bf8e4ce7c8a326e672
+      size: 10869
     - path: euroleague_data/raw/playbyplay_data_2023.parquet
       hash: md5
       md5: c8b3b0d45dac4ce4a0eac5f1f6bd2224
       size: 1592319
     - path: euroleague_data/raw/playbyplay_data_2024.parquet
       hash: md5
-      md5: f54ec20ec41eaf0b40ec8f3c8d98476d
-      size: 780703
+      md5: 1edba8eaf1c5b2ee83013a76153eebaf
+      size: 944037
     - path: euroleague_data/raw/player_stats_2023.parquet
       hash: md5
       md5: 9955a857ccb25ce04bf556cf729b76e4
       size: 191887
     - path: euroleague_data/raw/player_stats_2024.parquet
       hash: md5
-      md5: 18ac93637479fbf08713276e4c27c749
-      size: 111081
+      md5: e5bfc1911d484be898ae6e902914bf19
+      size: 129569
     - path: euroleague_data/raw/quarter_data_2023.parquet
       hash: md5
       md5: b813e598908055a5eaec95a982856ad1
       size: 13618
     - path: euroleague_data/raw/quarter_data_2024.parquet
       hash: md5
-      md5: 4c5e6c420107f7a66b11e4843e3fc9c5
-      size: 10032
+      md5: f4778cb59d5083dba255060cdca28c9a
+      size: 10537
     - path: euroleague_data/raw/shot_data_2023.parquet
       hash: md5
       md5: 22f7d08ae84ea53def1c46c6d3b3fdcc
       size: 947024
     - path: euroleague_data/raw/shot_data_2024.parquet
       hash: md5
-      md5: 4d15a7e4301204e0dd9f9a12d8638e2a
-      size: 480626
+      md5: dee1cc5ba8e5266553aa574cf598f391
+      size: 581856
   feature_engineering:
     cmd: uv run python -m src.euroleague_analysis.feature_engineering
     deps:
@@ -326,24 +326,24 @@ stages:
       size: 1592319
     - path: euroleague_data/raw/playbyplay_data_2024.parquet
       hash: md5
-      md5: f54ec20ec41eaf0b40ec8f3c8d98476d
-      size: 780703
+      md5: 1edba8eaf1c5b2ee83013a76153eebaf
+      size: 944037
     - path: euroleague_data/raw/player_stats_2023.parquet
       hash: md5
       md5: 9955a857ccb25ce04bf556cf729b76e4
       size: 191887
     - path: euroleague_data/raw/player_stats_2024.parquet
       hash: md5
-      md5: 18ac93637479fbf08713276e4c27c749
-      size: 111081
+      md5: e5bfc1911d484be898ae6e902914bf19
+      size: 129569
     - path: euroleague_data/raw/shot_data_2023.parquet
       hash: md5
       md5: 22f7d08ae84ea53def1c46c6d3b3fdcc
       size: 947024
     - path: euroleague_data/raw/shot_data_2024.parquet
       hash: md5
-      md5: 4d15a7e4301204e0dd9f9a12d8638e2a
-      size: 480626
+      md5: dee1cc5ba8e5266553aa574cf598f391
+      size: 581856
     - path: src/euroleague_analysis/feature_engineering
       hash: md5
       md5: 944123eebd02cff237bb1f94c7a4faca.dir
@@ -351,9 +351,9 @@ stages:
       nfiles: 8
     - path: src/euroleague_analysis/sql_queries
       hash: md5
-      md5: 64fe21a71caed02dc9db8802a6c3e84a.dir
-      size: 23597
-      nfiles: 4
+      md5: 9a6ccbb1c7d0698d4a8d6b8e44da2424.dir
+      size: 31729
+      nfiles: 5
     outs:
     - path: euroleague_data/features.duckdb
       hash: md5
@@ -361,19 +361,19 @@ stages:
       size: 274432
     - path: euroleague_data/features.parquet
       hash: md5
-      md5: f56c1c0161b0023413c401bcfee3d6af
-      size: 858829
+      md5: e3e5aea2517c82cf41c43aefe535eabb
+      size: 927644
     - path: feature_outputs.json
       hash: md5
-      md5: bd3425f70d666b1dd099c20350c26284
+      md5: c5e5b1744c45a949c055f30a17853b68
       size: 196
   train_model:
     cmd: uv run python -m src.euroleague_analysis.train_model
     deps:
     - path: euroleague_data/features.parquet
       hash: md5
-      md5: f56c1c0161b0023413c401bcfee3d6af
-      size: 858829
+      md5: e3e5aea2517c82cf41c43aefe535eabb
+      size: 927644
     - path: params.yaml
       hash: md5
       md5: 440cfc99523c04fd4fdc7be06847eb47
@@ -384,30 +384,30 @@ stages:
       size: 2829
     - path: src/euroleague_analysis/train_model.py
       hash: md5
-      md5: 81e5498d60181a46342b394e7267e90b
-      size: 9742
+      md5: 018182eb7a0507be6785d54646d96596
+      size: 10344
     outs:
     - path: models/metrics.json
       hash: md5
-      md5: 5f931d5971f6ee9a5c1662a1b79a5d49
-      size: 750
+      md5: 29e5769b73f46ba12e0a84877a7e09f2
+      size: 746
     - path: models/pir_predictor.joblib
       hash: md5
-      md5: f93fd8e5ce6a9413be8e249dfd7cf4a0
-      size: 337832
+      md5: b7dbd95c155b00221bc3eda943f16b28
+      size: 337992
     - path: models/plots/cv_scores_distribution.png
       hash: md5
-      md5: 27eface6b07b5fefc66c6e8217b8e880
-      size: 28881
+      md5: 40b518e245db711a4bebdc99446a97b7
+      size: 30379
     - path: models/plots/learning_curves.png
       hash: md5
-      md5: 2c2cf125a4de1ebeae74d9b74532932c
-      size: 41005
+      md5: 740f8703417556380d9848ed95057387
+      size: 40326
     - path: models/plots/prediction_scatter.png
       hash: md5
-      md5: e2f467afea1d6399784bf41d7c12bca7
-      size: 148840
+      md5: b97ae57a87b8d1f4a38b304b03378ab8
+      size: 148767
     - path: models/scaler.joblib
       hash: md5
-      md5: 95b8dcde764f42065bbe343293bbb322
+      md5: 9be6ccdad46c70cebe869f371355a492
       size: 2207
