@@ -19,7 +19,6 @@ stages:
     cmd: uv run python -m src.euroleague_analysis.feature_engineering
     deps:
       - src/euroleague_analysis/feature_engineering
-      - src/euroleague_analysis/sql_queries
       - euroleague_data/raw/player_stats_2023.parquet
       - euroleague_data/raw/playbyplay_data_2023.parquet
       - euroleague_data/raw/shot_data_2023.parquet
@@ -28,10 +27,6 @@ stages:
       - euroleague_data/raw/shot_data_2024.parquet
     outs:
       - euroleague_data/features.parquet
-      - euroleague_data/features.duckdb
-    metrics:
-      - feature_outputs.json:
-          cache: false
 
   train_model:
     cmd: uv run python -m src.euroleague_analysis.train_model

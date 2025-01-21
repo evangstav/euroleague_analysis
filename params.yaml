@@ -3,11 +3,16 @@ extract:
   data_dir: "euroleague_data"
   competition_code: "E"
 
-features:
-  seasons: [2023, 2024]
-  data_dir: "euroleague_data"
-  rolling_windows: [3, 5]
-  min_minutes: 0
+feature_engineering:
+  data_dir: "euroleague_data"  # Changed to match extract section
+  output_dir: "euroleague_data"  # Changed from "features" to match DVC expectation
+  seasons: ["2023", "2024"]  # Updated to match actual season format
+  transformers:  # optional, uses all if not specified
+    - basic_stats
+    - rolling_stats
+    - shot_patterns
+    - playbyplay
+    - position_matchups
 
 train:
   data_dir: "euroleague_data"
