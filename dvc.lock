@@ -346,29 +346,29 @@ stages:
       size: 581856
     - path: src/euroleague_analysis/feature_engineering
       hash: md5
-      md5: 71ef822bfc33863535dd9d7ed2456fbf.dir
-      size: 41895
-      nfiles: 12
+      md5: 3c17dc615383664e5acf28138629497c.dir
+      size: 47988
+      nfiles: 11
     outs:
     - path: euroleague_data/features.parquet
       hash: md5
-      md5: af5fc97c07c21470abc019d3d344b071
-      size: 595192
+      md5: c98b5103c653585fa460c201cb0e8b9d
+      size: 1052078
   train_model:
     cmd: uv run python -m src.euroleague_analysis.train_model
     deps:
     - path: euroleague_data/features.parquet
       hash: md5
-      md5: af5fc97c07c21470abc019d3d344b071
-      size: 595192
+      md5: c98b5103c653585fa460c201cb0e8b9d
+      size: 1052078
     - path: params.yaml
       hash: md5
-      md5: 00b88b45e440110711966c65a21f8363
-      size: 1056
+      md5: 9c788f51c355f9c388851b26bee501f6
+      size: 1039
     - path: src/euroleague_analysis/model_config.py
       hash: md5
-      md5: 3e36ccc353ec487376282694ba9c4685
-      size: 2829
+      md5: 5a2c463fe4ec485e98fbf992a55ad291
+      size: 4086
     - path: src/euroleague_analysis/train_model.py
       hash: md5
       md5: 018182eb7a0507be6785d54646d96596
@@ -376,25 +376,25 @@ stages:
     outs:
     - path: models/metrics.json
       hash: md5
-      md5: 35fe8b6cf3ddff1b9d0a340f87e4b453
+      md5: f802b62384091e61b4d02d8e38138748
       size: 740
     - path: models/pir_predictor.joblib
       hash: md5
-      md5: 0d6faad1b5937c07e1f46182b2c4a624
-      size: 174976
+      md5: 6a01d87c605331026172a2148589330b
+      size: 266310
     - path: models/plots/cv_scores_distribution.png
       hash: md5
-      md5: d0cae4c0ca3e367bbd22cceb309c57bc
-      size: 30229
+      md5: 3d0f86ca035f2b655f1e8f04c155a149
+      size: 30143
     - path: models/plots/learning_curves.png
       hash: md5
-      md5: df8a8095f71f9122af91670ad730791d
-      size: 39397
+      md5: 5ebab682ecc0c48bd111f0290061028f
+      size: 41321
     - path: models/plots/prediction_scatter.png
       hash: md5
-      md5: dd5227c5b5d23a17ecf39bb972e89a51
-      size: 144594
+      md5: a8af73fe6bc92b4093e275c4f7b2f8b9
+      size: 148146
     - path: models/scaler.joblib
       hash: md5
-      md5: a63d12a08e90191b8d24d725b2bf1792
-      size: 2207
+      md5: 27781c72978b40ddce723b9718fd8cc5
+      size: 3903

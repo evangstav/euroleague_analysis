@@ -8,8 +8,7 @@ feature_engineering:
   output_dir: "euroleague_data"  # Changed from "features" to match DVC expectation
   seasons: ["2023", "2024"]  # Updated to match actual season format
   transformers:  # optional, uses all if not specified
-    - basic_stats
-    - rolling_stats
+    - combined_stats
     - shot_patterns
     - playbyplay
     - position_matchups

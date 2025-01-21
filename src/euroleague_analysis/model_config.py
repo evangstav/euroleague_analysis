@@ -3,43 +3,79 @@ Shared configuration for model training and analysis.
 """
 
 FEATURE_COLUMNS = [
+    # Basic efficiency metrics
+    "true_shooting_percentage",
+    "points_per_shot_right",
+    "free_throw_rate",
+    "offensive_rebound_rate_right",
+    "defensive_rebound_rate_right",
+    "assist_rate_right",
+    "steal_rate_right",
+    "block_rate_right",
+    "turnover_rate_right",
+    "usage_rate_right",
+    "game_score",
+    "floor_percentage",
+    # Shot pattern metrics
+    "shot_quality_index",
+    "avg_shot_distance",
+    "shot_distance_variation",
+    "court_coverage_area",
+    "unique_scoring_zones",
+    "shot_angle_spread",
+    "effective_fg_percentage",
+    "close_shot_percentage",
+    "mid_range_percentage",
+    "long_range_percentage",
+    "fastbreak_fg_percentage",
+    "second_chance_fg_percentage",
+    # Play-by-play impact metrics
+    "avg_play_impact",
+    "total_play_impact",
+    "clutch_play_impact",
+    "best_impact_sequence",
+    "worst_impact_sequence",
+    "game_volatility",
+    "close_game_time_ratio",
+    # Game situation metrics
+    "super_clutch_plays",
+    "super_clutch_scores",
+    "close_game_impact_plays",
+    "consecutive_positive_plays",
     # Rolling averages (past performance)
     "minutes_ma3",
+    "minutes_ma5",
+    "minutes_ma10",
     "points_ma3",
+    "points_ma5",
+    "points_ma10",
     "pir_ma3",
+    "pir_ma5",
+    "pir_ma10",
+    # Advanced rolling metrics
+    "usage_rate_ma3",
+    "usage_rate_ma5",
+    "net_contribution_ma3",
+    "net_contribution_ma5",
+    "scoring_efficiency_ma3",
+    "scoring_efficiency_ma5",
+    # Consistency and form metrics
+    "pir_median_ma5",
+    "pir_std5",
+    "consistency_score",
+    "trend_indicator",
+    "recent_form",
+    "pir_vs_season_avg",
+    # Exponentially weighted metrics
+    "pir_ewm",
+    "points_ewm",
+    "net_contribution_ewm",
     # Current game basic stats
     "minutes_played",
     "Points",
-    # Shooting efficiency
-    "fg_percentage",
-    "ft_percentage",
-    "fg_percentage_2pt",
-    "fg_percentage_3pt",
-    "three_point_rate",
-    # Game situation stats
-    "fastbreak_rate",
-    "second_chance_rate",
-    "clutch_plays",
-    "clutch_scores",
-    # Game involvement
-    "first_quarter_plays",
-    "fourth_quarter_plays",
-    "close_game_plays",
-    "consecutive_positive_plays",
-    # Play style metrics
-    "assist_rate",
-    "shot_attempt_rate",
-    "defensive_play_rate",
+    # Key efficiency metrics
     "ast_to_turnover",
-    "turnover_rate",
-    # Form indicators
-    "improving_form",
-    "pir_std3",
-    "pir_vs_season_avg",
-    "pir_rank_in_game",
-    # Game context
-    "is_starter",
-    "is_home",
+    "fg_percentage",
 ]
 
 TARGET_COLUMN = "next_PIR"
@@ -47,7 +83,15 @@ ID_COLUMNS = ["Season", "Phase", "Round", "Gamecode", "Player_ID"]
 
 
 def prepare_features(df, for_prediction=False):
-    """Common feature preparation logic."""
+    """Common feature preparation logic.
+
+    Works with both Polars and Pandas DataFrames.
+    """
+    # Convert Polars DataFrame to Pandas if needed
+    is_polars = hasattr(df, "to_pandas")
+    if is_polars:
+        df = df.to_pandas()
+    print(df.columns)
     if not for_prediction:
         # Sort by time for proper train/test splitting
         df = df.sort_values(["Season", "Round"])
